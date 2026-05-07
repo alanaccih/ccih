@@ -167,6 +167,23 @@ textarea{resize:vertical;min-height:72px;}
 .ab-total-row{font-family:var(--font-d);font-size:13px;font-weight:500;color:var(--text);padding:8px 12px;border-top:1px solid var(--border);background:var(--surface2);text-align:right;}
 .ab-del-btn{width:26px;height:26px;border:1px solid var(--border);border-radius:var(--r);background:none;cursor:pointer;color:var(--text3);font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:end;margin-bottom:1px;}
 .ab-del-btn:hover{background:var(--red-bg);color:var(--red);border-color:#f0c0c0;}
+/* MEDIDAS DE PREVENÇÃO */
+.prev-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.prev-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.prev-label{font-size:11px;font-family:var(--font-d);letter-spacing:.05em;text-transform:uppercase;color:var(--text2);padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.prev-opts{display:flex;gap:0;}
+.prev-opt{flex:1;padding:8px 10px;font-size:12px;font-family:var(--font-b);cursor:pointer;border:none;background:none;border-right:1px solid var(--border);color:var(--text2);transition:all .15s;}
+.prev-opt:last-child{border-right:none;}
+.prev-opt:hover{background:var(--surface2);}
+.prev-opt.conf{background:var(--green-bg);color:var(--green);font-weight:500;}
+.prev-opt.nconf{background:var(--red-bg);color:var(--red);font-weight:500;}
+.prev-obs{padding:8px 12px;border-top:1px solid var(--border);display:none;}
+.prev-obs input{font-size:12px;padding:6px 9px;border:1px solid var(--border);border-radius:4px;width:100%;background:var(--bg);}
+.prev-opt.nav{background:var(--amber-bg);color:var(--amber);font-weight:500;}
+/* STATUS DE COMPLETUDE */
+.badge-comp{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-family:var(--font-d);padding:3px 9px;border-radius:4px;font-weight:500;white-space:nowrap;}
+.badge-comp.completo{background:var(--green-bg);color:var(--green);}
+.badge-comp.parcial{background:var(--amber-bg);color:var(--amber);}
 /* BACKUP BUTTONS */
 .hactions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .hbtn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;font-size:12px;font-family:var(--font-b);border-radius:var(--r);cursor:pointer;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);transition:all .15s;white-space:nowrap;}
@@ -267,6 +284,9 @@ textarea{resize:vertical;min-height:72px;}
     <button class="nitem" onclick="showTab('nova',this)">
       <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v6M4 7h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Nova solicitação
     </button>
+    <button class="nitem" onclick="showTab('prevencao',this)">
+      <svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5H12l-2.8 2 1 3.5L7 8l-3.2 2 1-3.5L2 4.5h3.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Medidas de prevenção
+    </button>
     <button class="nitem" onclick="showTab('registros',this)">
       <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M4 5h6M4 7.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Todos os registros
     </button>
@@ -314,6 +334,7 @@ textarea{resize:vertical;min-height:72px;}
   <div class="card">
     <div class="ctitle" style="margin-bottom:1.25rem;">Dados do paciente</div>
     <div class="fgrid">
+      <div class="fg"><label>Nome do paciente (iniciais)</label><input type="text" id="f-iniciais" placeholder="Ex: M.S.F." oninput="this.value=this.value.toUpperCase()" style="text-transform:uppercase;"></div>
       <div class="fg"><label>Número do atendimento</label><input type="text" id="f-pron" placeholder="Ex: 123456"></div>
       <div class="fg"><label>Data de nascimento</label><input type="date" id="f-nasc" oninput="calcIdade()"></div>
       <div class="fg"><label>Idade</label><input type="text" id="f-idade" placeholder="— anos" readonly style="background:var(--surface2);cursor:default;color:var(--text2);"></div>
@@ -353,10 +374,38 @@ textarea{resize:vertical;min-height:72px;}
       <div class="fg full"><label>Observações</label><textarea id="f-obs" placeholder="Observações adicionais..."></textarea></div>
     </div>
     <div class="brow">
-      <button class="btn pri" onclick="salvarSol()"><svg viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5.5 10L11 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Salvar solicitação</button>
+      <button class="btn pri" onclick="salvarSol()"><svg viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5.5 10L11 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Salvar cirurgia</button>
       <button class="btn" onclick="limparForm()">Limpar</button>
     </div>
   </div>
+</div>
+
+<!-- MEDIDAS DE PREVENÇÃO — aba separada -->
+<div class="section" id="tab-prevencao">
+  <div class="phdr">
+    <div><div class="ptitle">Medidas de prevenção</div><div class="psub">Preencha após a cirurgia — complementa o registro já salvo</div></div>
+  </div>
+  <div id="prev-alert" class="alert"></div>
+  <!-- Seletor de registro -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="ctitle" style="margin-bottom:1rem;">Selecione o registro</div>
+    <div class="frow">
+      <select id="prev-sel" onchange="onPrevSelChange()" style="font-size:13px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);flex:1;max-width:500px;">
+        <option value="">Selecione um atendimento...</option>
+      </select>
+    </div>
+    <div id="prev-info" style="margin-top:10px;font-size:12px;color:var(--text3);display:none;"></div>
+  </div>
+  <!-- Formulário de medidas -->
+  <div class="card" id="prev-form-card" style="display:none;">
+    <div class="ctitle" style="margin-bottom:1.25rem;">Medidas de prevenção de infecção</div>
+    <div class="prev-grid" id="prev-campos"></div>
+    <div class="brow" style="margin-top:1.25rem;">
+      <button class="btn pri" onclick="salvarPrevencao()">✓ Salvar medidas de prevenção</button>
+    </div>
+  </div>
+  <!-- Resumo após salvar -->
+  <div class="card" id="prev-resumo-salvo" style="display:none;"></div>
 </div>
 
 <!-- REGISTROS -->
@@ -370,10 +419,15 @@ textarea{resize:vertical;min-height:72px;}
       <span style="font-size:12px;color:var(--text2);">Filtrar:</span>
       <select id="fr-ab" onchange="renderReg()"><option value="">Todos os antibióticos</option></select>
       <select id="fr-eq" onchange="renderReg()"><option value="">Todas as equipes</option></select>
+      <select id="fr-comp" onchange="renderReg()">
+        <option value="">Todos os registros</option>
+        <option value="completo">Completos</option>
+        <option value="parcial">Parciais (sem prevenção)</option>
+      </select>
       <input type="date" id="fr-de" onchange="renderReg()" title="A partir de">
       <input type="date" id="fr-ate" onchange="renderReg()" title="Até">
     </div>
-    <table><thead><tr><th>Atendimento</th><th>Procedimento</th><th>Antibiótico</th><th>Valor</th><th>Equipe</th><th>Médico</th><th>Data</th><th>Duração</th><th>Ações</th></tr></thead>
+    <table><thead><tr><th>Atendimento</th><th>Procedimento</th><th>Antibiótico</th><th>Valor</th><th>Equipe</th><th>Médico</th><th>Data</th><th>Duração</th><th>Status</th><th>Ações</th></tr></thead>
     <tbody id="all-tbody"><tr><td colspan="10" class="empty">Nenhum registro encontrado.</td></tr></tbody></table>
   </div>
 </div>
@@ -634,9 +688,18 @@ textarea{resize:vertical;min-height:72px;}
 
   <div class="cgrid">
     <div class="card"><div class="ctitle" style="margin-bottom:1rem;">Antibióticos mais utilizados</div><div class="cw"><canvas id="ch-ab" role="img" aria-label="Antibióticos">.</canvas></div></div>
-    <div class="card"><div class="ctitle" style="margin-bottom:1rem;">Solicitações por equipe</div><div class="cw"><canvas id="ch-eq" role="img" aria-label="Por equipe">.</canvas></div></div>
   </div>
   <div class="card" style="margin-bottom:1.25rem;"><div class="ctitle" style="margin-bottom:1rem;">Volume de solicitações ao longo do tempo</div><div class="cww"><canvas id="ch-t" role="img" aria-label="Tempo">.</canvas></div></div>
+
+  <!-- MEDIDAS DE PREVENÇÃO -->
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div class="ctitle" style="margin-bottom:.5rem;">Conformidade das medidas de prevenção</div>
+    <div style="font-size:11px;color:var(--text3);font-family:var(--font-d);margin-bottom:1rem;">Percentual de conformidade por medida — registros com prevenção preenchida</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div style="height:240px;"><canvas id="ch-prev-bar" role="img" aria-label="Medidas de prevenção">.</canvas></div>
+      <div style="height:240px;"><canvas id="ch-prev-comp" role="img" aria-label="Completude">.</canvas></div>
+    </div>
+  </div>
 </div>
 
 </main>
@@ -827,7 +890,7 @@ function atualizarSync(s) {
    ========================================================= */
 var sols=[], meds=[], eqs=[], procs=[], abs=[], anests=[];
 var selMed=null,selEq=null,selPick=null,selProc=null,selAb=null,selAnest=null;
-var cSeg=null,cSegProc=null,cAb=null,cT=null,cEq=null;
+var cSeg=null,cSegProc=null,cAb=null,cT=null,cEq=null,cPrevBar=null,cPrevComp=null;
 var abLinhas=[];
 var EQUIPES_FIXAS=['SAD','SCP','SUR','SMP','SOT','SOP','SOD','SNO','SGM','SOR','SPL','VAS'];
 
@@ -838,13 +901,172 @@ var TAB_FNS={
   dashboard:function(){renderDash();},registros:function(){renderReg();},
   medicos:function(){renderMeds();},procedimentos:function(){renderProcs();},
   antibioticos:function(){renderAbs();},anestesistas:function(){renderAnests();},
-  nova:function(){popNova();},graficos:function(){setTimeout(function(){renderCharts();},80);}
+  nova:function(){popNova();},prevencao:function(){popPrevencao();},
+  graficos:function(){setTimeout(function(){renderCharts();},80);}
 };
 function showTab(id,btn){
   var i,s=document.querySelectorAll('.section');for(i=0;i<s.length;i++)s[i].classList.remove('active');
   var n=document.querySelectorAll('.nitem');for(i=0;i<n.length;i++)n[i].classList.remove('active');
   var t=document.getElementById('tab-'+id);if(t)t.classList.add('active');
   if(btn)btn.classList.add('active');if(TAB_FNS[id])TAB_FNS[id]();
+}
+
+/* =========================================================
+   MEDIDAS DE PREVENÇÃO
+   ========================================================= */
+var PREV_CAMPOS = [
+  { id:'normotermia',    label:'Normotermia',           temNaoAv: false },
+  { id:'glicemia_pre',   label:'Glicemia pré-operatório', temNaoAv: false },
+  { id:'glicemia_pos',   label:'Glicemia pós-operatório', temNaoAv: false },
+  { id:'preparo_pele',   label:'Preparo da pele',        temNaoAv: true  },
+  { id:'antissepsia',    label:'Antissepsia das mãos',   temNaoAv: true  },
+  { id:'enxaguante',     label:'Enxaguante bucal',       temNaoAv: false }
+];
+
+function isCompleto(s) {
+  if (!s.prevencao) return false;
+  for (var i = 0; i < PREV_CAMPOS.length; i++) {
+    if (!s.prevencao[PREV_CAMPOS[i].id]) return false;
+  }
+  return true;
+}
+
+function badgeComp(s) {
+  if (isCompleto(s)) return '<span class="badge-comp completo">✓ Completo</span>';
+  return '<span class="badge-comp parcial">⚠ Parcial</span>';
+}
+
+function popPrevencao() {
+  var sel = document.getElementById('prev-sel');
+  var curVal = sel.value;
+  sel.innerHTML = '<option value="">Selecione um atendimento...</option>';
+  var lista = sols.slice().sort(function(a,b){
+    var da = a.dataCirurgia||''; var db2 = b.dataCirurgia||'';
+    return db2.localeCompare(da);
+  });
+  for (var i = 0; i < lista.length; i++) {
+    var s = lista[i];
+    var comp = isCompleto(s) ? ' ✓' : ' ⚠';
+    sel.innerHTML += '<option value="' + s.id + '"' + (s.id == curVal ? ' selected' : '') + '>' +
+      (s.atendimento||s.prontuario||s.id) + ' — ' + (s.procedimento||'') +
+      ' (' + fmtDate(s.dataCirurgia||s.data) + ')' + comp + '</option>';
+  }
+  // Esconde o formulário ao recarregar lista
+  document.getElementById('prev-form-card').style.display = 'none';
+  document.getElementById('prev-info').style.display = 'none';
+  document.getElementById('prev-resumo-salvo').style.display = 'none';
+  onPrevSelChange();
+}
+
+function onPrevSelChange() {
+  var id = document.getElementById('prev-sel').value;
+  var fc = document.getElementById('prev-form-card');
+  var fi = document.getElementById('prev-info');
+  var fr = document.getElementById('prev-resumo-salvo');
+  if (!id) { fc.style.display='none'; fi.style.display='none'; if(fr)fr.style.display='none'; return; }
+  var s = null;
+  for (var i = 0; i < sols.length; i++) if (String(sols[i].id) === String(id)) { s = sols[i]; break; }
+  if (!s) return;
+  fi.style.display = 'block';
+  fi.innerHTML = '<strong>' + (s.atendimento||s.prontuario||'') + '</strong> · ' + (s.procedimento||'') + ' · ' + (s.solicitante||'') + ' · ' + fmtDate(s.dataCirurgia||s.data);
+  if (fr) fr.style.display = 'none';
+  fc.style.display = 'block';
+  renderPrevCampos(s.prevencao || {});
+}
+
+function renderPrevCampos(prev) {
+  var html = '';
+  for (var i = 0; i < PREV_CAMPOS.length; i++) {
+    var c = PREV_CAMPOS[i];
+    var val = prev[c.id] || '';
+    var obsVal = prev[c.id + '_obs'] || '';
+    var isConf  = val === 'conforme';
+    var isNConf = val === 'nao_conforme';
+    var isNAv   = val === 'nao_avaliado';
+    html += '<div class="prev-item">' +
+      '<div class="prev-label">' + c.label + '</div>' +
+      '<div class="prev-opts">' +
+        '<button class="prev-opt' + (isConf  ? ' conf'  : '') + '" onclick="setPrev(\'' + c.id + '\',\'conforme\')"     id="btn_conf_'  + c.id + '">Conforme</button>' +
+        '<button class="prev-opt' + (isNConf ? ' nconf' : '') + '" onclick="setPrev(\'' + c.id + '\',\'nao_conforme\')" id="btn_nconf_' + c.id + '">Não conforme</button>' +
+        (c.temNaoAv ? '<button class="prev-opt' + (isNAv ? ' nav' : '') + '" onclick="setPrev(\'' + c.id + '\',\'nao_avaliado\')" id="btn_nav_' + c.id + '">Não avaliado</button>' : '') +
+      '</div>' +
+      '<div class="prev-obs" id="obs_' + c.id + '" style="display:' + (isNConf ? 'block' : 'none') + ';">' +
+        '<input type="text" id="val_' + c.id + '" value="' + obsVal + '" placeholder="Especifique o motivo...">' +
+      '</div>' +
+    '</div>';
+  }
+  document.getElementById('prev-campos').innerHTML = html;
+}
+
+function setPrev(campo, valor) {
+  var btnConf  = document.getElementById('btn_conf_'  + campo);
+  var btnNConf = document.getElementById('btn_nconf_' + campo);
+  var btnNAv   = document.getElementById('btn_nav_'   + campo);
+  var obsDiv   = document.getElementById('obs_' + campo);
+  // Limpa todos
+  if (btnConf)  btnConf.className  = 'prev-opt';
+  if (btnNConf) btnNConf.className = 'prev-opt';
+  if (btnNAv)   btnNAv.className   = 'prev-opt';
+  if (obsDiv)   obsDiv.style.display = 'none';
+  // Ativa o selecionado
+  if (valor === 'conforme'      && btnConf)  btnConf.className  = 'prev-opt conf';
+  if (valor === 'nao_conforme'  && btnNConf) { btnNConf.className = 'prev-opt nconf'; if(obsDiv){obsDiv.style.display='block'; document.getElementById('val_'+campo).focus();} }
+  if (valor === 'nao_avaliado'  && btnNAv)   btnNAv.className   = 'prev-opt nav';
+}
+
+function salvarPrevencao() {
+  var id = document.getElementById('prev-sel').value;
+  if (!id) { alert2('prev-alert','Selecione um atendimento.','er'); return; }
+  var idx = -1;
+  for (var i = 0; i < sols.length; i++) if (String(sols[i].id) === String(id)) { idx = i; break; }
+  if (idx === -1) { alert2('prev-alert','Registro não encontrado.','er'); return; }
+  var prev = {};
+  for (var j = 0; j < PREV_CAMPOS.length; j++) {
+    var c = PREV_CAMPOS[j];
+    var btnConf  = document.getElementById('btn_conf_'  + c.id);
+    var btnNConf = document.getElementById('btn_nconf_' + c.id);
+    var btnNAv   = document.getElementById('btn_nav_'   + c.id);
+    if      (btnConf  && btnConf.className.indexOf('conf')  !== -1 && btnConf.className.indexOf('nconf') === -1) { prev[c.id] = 'conforme'; }
+    else if (btnNConf && btnNConf.className.indexOf('nconf') !== -1) { prev[c.id] = 'nao_conforme'; prev[c.id+'_obs'] = document.getElementById('val_'+c.id).value; }
+    else if (btnNAv   && btnNAv.className.indexOf('nav')    !== -1) { prev[c.id] = 'nao_avaliado'; }
+  }
+  sols[idx].prevencao = prev;
+  save();
+
+  // Fecha o formulário e exibe resumo do que foi salvo
+  document.getElementById('prev-form-card').style.display = 'none';
+  document.getElementById('prev-info').style.display = 'none';
+  var fr = document.getElementById('prev-resumo-salvo');
+  if (fr) {
+    var nomes = {'normotermia':'Normotermia','glicemia_pre':'Glicemia pré-op','glicemia_pos':'Glicemia pós-op','preparo_pele':'Preparo da pele','antissepsia':'Antissepsia das mãos','enxaguante':'Enxaguante bucal'};
+    var cores = { conforme:'color:var(--green)', nao_conforme:'color:var(--red)', nao_avaliado:'color:var(--amber)' };
+    var labels = { conforme:'Conforme', nao_conforme:'Não conforme', nao_avaliado:'Não avaliado' };
+    var resumoHtml = '<div style="font-family:var(--font-d);font-size:12px;font-weight:500;margin-bottom:10px;color:var(--green);">✓ Medidas de prevenção salvas com sucesso!</div>';
+    resumoHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    for (var campo in nomes) {
+      var vl = prev[campo] || '—';
+      var cor = cores[vl] || 'color:var(--text3)';
+      var lb  = labels[vl] || 'Não preenchido';
+      var obs2 = (vl === 'nao_conforme' && prev[campo+'_obs']) ? ' — ' + prev[campo+'_obs'] : '';
+      resumoHtml += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;">' +
+        '<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">' + nomes[campo] + '</div>' +
+        '<div style="font-size:12px;font-weight:500;' + cor + '">' + lb + obs2 + '</div>' +
+        '</div>';
+    }
+    resumoHtml += '</div>';
+    resumoHtml += '<div style="margin-top:12px;"><button class="btn" onclick="onPrevSelChange()">Editar</button></div>';
+    fr.innerHTML = resumoHtml;
+    fr.style.display = 'block';
+  }
+  // Atualiza o select com o novo status e reexibe info do paciente
+  var solAtual = sols[idx];
+  popPrevencao();
+  document.getElementById('prev-sel').value = id;
+  var fi2 = document.getElementById('prev-info');
+  if (fi2) {
+    fi2.style.display = 'block';
+    fi2.innerHTML = '<strong>' + (solAtual.iniciais ? solAtual.iniciais + ' · ' : '') + (solAtual.atendimento||solAtual.prontuario||'') + '</strong> · ' + (solAtual.procedimento||'') + ' · ' + fmtDate(solAtual.dataCirurgia||solAtual.data) + ' &nbsp;<span style="color:var(--green);font-weight:500;">✓ Prevenção salva</span>';
+  }
 }
 function badge(s){return'<span class="badge '+s+'">'+s.charAt(0).toUpperCase()+s.slice(1)+'</span>';}
 function ini(n){if(!n)return'?';var p=n.split(' '),r='',i;for(i=0;i<Math.min(2,p.length);i++)if(p[i])r+=p[i][0].toUpperCase();return r||'?';}
@@ -1473,6 +1695,7 @@ function salvarSol() {
 
   sols.push({
     id: Date.now(),
+    iniciais:    g('f-iniciais'),
     atendimento: g('f-pron'),
     nascimento:  g('f-nasc'),
     idade:       g('f-idade'),
@@ -1498,7 +1721,7 @@ function salvarSol() {
   setTimeout(function(){ showTab('dashboard', document.querySelector('.nitem')); }, 900);
 }
 function limparForm() {
-  var ids = ['f-pron','f-nasc','f-idade','f-peso','f-data-d','f-data-h','f-data-fim','f-duracao','f-hinfusao','f-obs'];
+  var ids = ['f-iniciais','f-pron','f-nasc','f-idade','f-peso','f-data-d','f-data-h','f-data-fim','f-duracao','f-hinfusao','f-obs'];
   var i, el;
   for (i = 0; i < ids.length; i++) { el = document.getElementById(ids[i]); if (el) el.value = ''; }
   document.getElementById('f-genero').value = '';
@@ -1553,6 +1776,7 @@ function renderDash() {
 function renderReg() {
   var fA = document.getElementById('fr-ab').value;
   var fE = document.getElementById('fr-eq').value;
+  var fComp = (document.getElementById('fr-comp')||{value:''}).value;
   var fD = document.getElementById('fr-de').value;
   var fAt= document.getElementById('fr-ate').value;
 
@@ -1579,6 +1803,8 @@ function renderReg() {
     if (fE && s.equipeNome  !== fE) continue;
     if (fD  && d && d < fD)  continue;
     if (fAt && d && d > fAt) continue;
+    if (fComp === 'completo' && !isCompleto(s)) continue;
+    if (fComp === 'parcial'  &&  isCompleto(s)) continue;
     lst.push({ sol:s, idx:i });
   }
   var tb = document.getElementById('all-tbody');
@@ -1596,10 +1822,11 @@ function renderReg() {
       '<td>' + (s.solicitante||'—') + '</td>' +
       '<td style="font-size:12px;font-family:var(--font-d);">' + fmtDate(d) + '</td>' +
       '<td style="font-family:var(--font-d);font-size:12px;">' + (s.duracaoCirurgia||'—') + '</td>' +
+      '<td>' + badgeComp(s) + '</td>' +
       '<td style="white-space:nowrap;">' +
-        '<button onclick="verDet(' + lst[i].idx + ')" style="border:none;background:none;cursor:pointer;color:var(--text2);font-size:12px;font-family:var(--font-d);margin-right:6px;">ver →</button>' +
-        '<button onclick="editarSol(' + lst[i].idx + ')" style="border:1px solid var(--border);background:none;cursor:pointer;color:var(--text2);font-size:11px;font-family:var(--font-d);padding:2px 8px;border-radius:4px;margin-right:4px;">editar</button>' +
-        '<button onclick="excluirSol(' + lst[i].idx + ')" style="border:1px solid #f0c0c0;background:none;cursor:pointer;color:var(--red);font-size:11px;font-family:var(--font-d);padding:2px 8px;border-radius:4px;">excluir</button>' +
+        '<button onclick="verDet(' + lst[i].idx + ')" style="border:none;background:none;cursor:pointer;color:var(--text2);font-size:12px;font-family:var(--font-d);margin-right:4px;">ver →</button>' +
+        '<button onclick="editarSol(' + lst[i].idx + ')" style="border:1px solid var(--border);background:none;cursor:pointer;color:var(--text2);font-size:11px;font-family:var(--font-d);padding:2px 7px;border-radius:4px;margin-right:3px;">editar</button>' +
+        '<button onclick="excluirSol(' + lst[i].idx + ')" style="border:1px solid #f0c0c0;background:none;cursor:pointer;color:var(--red);font-size:11px;font-family:var(--font-d);padding:2px 7px;border-radius:4px;">excluir</button>' +
       '</td>' +
       '</tr>';
   }
@@ -1746,7 +1973,6 @@ function renderCharts() {
     s=sols[i];
     if(s.antibiotico) abC[s.antibiotico]=(abC[s.antibiotico]||0)+1;
     d=s.dataCirurgia||(s.data?s.data.slice(0,10):null); if(d) dC[d]=(dC[d]||0)+1;
-    if(s.equipeNome) { var parts=s.equipeNome.split(','); for(var k=0;k<parts.length;k++){var ep=parts[k].trim();if(ep)eC[ep]=(eC[ep]||0)+1;} }
   }
   var abK = Object.keys(abC).sort(function(a,b){return abC[b]-abC[a];}).slice(0,6);
   if(cAb)cAb.destroy();
@@ -1754,9 +1980,6 @@ function renderCharts() {
   var days=Object.keys(dC).sort();
   if(cT)cT.destroy();
   cT=new Chart(document.getElementById('ch-t'),{type:'line',data:{labels:days,datasets:[{data:days.map(function(d2){return dC[d2];}),borderColor:'#1a1916',backgroundColor:'rgba(26,25,22,0.07)',fill:true,tension:0.35,pointRadius:4,pointBackgroundColor:'#1a1916'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11},color:'#9e9c93'}},y:{ticks:{stepSize:1,color:'#9e9c93'}}}}});
-  var eK=Object.keys(eC);
-  if(cEq)cEq.destroy();
-  cEq=new Chart(document.getElementById('ch-eq'),{type:'bar',data:{labels:eK.map(function(k){return k.length>22?k.slice(0,22)+'…':k;}),datasets:[{data:eK.map(function(k){return eC[k];}),backgroundColor:'#534AB7',borderWidth:0,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#9e9c93'}},y:{ticks:{stepSize:1,color:'#9e9c93'}}}}});
 }
 
 /* =========================================================
@@ -1775,6 +1998,7 @@ function verDet(idx) {
     if (s.antibioticoValor) totalStr = fmtBRL(s.antibioticoValor);
   }
   var fields = [
+    ['Nome (iniciais)', s.iniciais],
     ['Nº atendimento', s.atendimento||s.prontuario],
     ['Nascimento', fmtDate(s.nascimento)!=='—'?fmtDate(s.nascimento):''],
     ['Idade', s.idade], ['Gênero', s.genero], ['Peso', s.peso?s.peso+' kg':''],
@@ -1792,6 +2016,20 @@ function verDet(idx) {
   if (absHtml) {
     body += '<div class="drow"><div class="dkey" style="padding-top:4px;">Antibióticos</div><div class="dval" style="display:flex;flex-direction:column;gap:4px;">'+absHtml+'</div></div>';
     if (totalStr) body += '<div class="drow"><div class="dkey">Custo total</div><div class="dval" style="font-weight:500;">'+totalStr+'</div></div>';
+  }
+  // Medidas de prevenção
+  if (s.prevencao) {
+    var nomes = {'normotermia':'Normotermia','glicemia_pre':'Glicemia pré-op','glicemia_pos':'Glicemia pós-op','preparo_pele':'Preparo da pele','antissepsia':'Antissepsia das mãos','enxaguante':'Enxaguante bucal'};
+    var prevHtml = '';
+    for (var campo in nomes) {
+      var vp = s.prevencao[campo];
+      if (vp) {
+        var cor = vp === 'conforme' ? 'color:var(--green);' : 'color:var(--red);';
+        var txt = vp === 'conforme' ? 'Conforme' : 'Não conforme' + (s.prevencao[campo+'_obs'] ? ' — ' + s.prevencao[campo+'_obs'] : '');
+        prevHtml += '<div style="display:flex;gap:8px;margin-bottom:4px;font-size:12px;"><span style="min-width:160px;color:var(--text3);">' + nomes[campo] + '</span><span style="' + cor + 'font-weight:500;">' + txt + '</span></div>';
+      }
+    }
+    if (prevHtml) body += '<div class="drow"><div class="dkey" style="padding-top:4px;">Medidas de prevenção</div><div class="dval">' + prevHtml + '</div></div>';
   }
   document.getElementById('mbody').innerHTML = body;
   // Botões de ação no modal
@@ -1827,6 +2065,7 @@ function editarSol(idx) {
   popNova();
   // Preenche campos do paciente
   var set = function(id, v) { var el=document.getElementById(id); if(el) el.value = v||''; };
+  set('f-iniciais', s.iniciais);
   set('f-pron',    s.atendimento||s.prontuario);
   set('f-nasc',    s.nascimento);
   set('f-idade',   s.idade);
@@ -1897,7 +2136,8 @@ function atualizarSol() {
   var criadoEm = sols[_editIdx].criadoEm;
   sols[_editIdx] = {
     id:idOrig, criadoEm:criadoEm, editadoEm:new Date().toISOString(),
-    atendimento:g('f-pron'), nascimento:g('f-nasc'), idade:g('f-idade'),
+    iniciais:    g('f-iniciais'),
+    atendimento: g('f-pron'), nascimento:g('f-nasc'), idade:g('f-idade'),
     genero:g('f-genero'), peso:g('f-peso'), procedimento:g('f-proc'),
     equipeNome:g('f-eq-hidden'), solicitante:med?med.nome:medId,
     anestesista:anest?anest.nome:'',
@@ -2048,12 +2288,11 @@ function renderCharts() {
   }
 
   // Auxiliares
-  var abC={}, dC={}, eC={};
+  var abC={}, dC={};
   for (i=0;i<sols.length;i++){
     s=sols[i];
     if(s.antibiotico) abC[s.antibiotico]=(abC[s.antibiotico]||0)+1;
     d=s.dataCirurgia||(s.data?s.data.slice(0,10):null); if(d) dC[d]=(dC[d]||0)+1;
-    if(s.equipeNome) { var parts=s.equipeNome.split(','); for(var k=0;k<parts.length;k++){var ep=parts[k].trim();if(ep)eC[ep]=(eC[ep]||0)+1;} }
   }
   var abK = Object.keys(abC).sort(function(a,b){return abC[b]-abC[a];}).slice(0,6);
   if(cAb)cAb.destroy();
@@ -2061,9 +2300,58 @@ function renderCharts() {
   var days=Object.keys(dC).sort();
   if(cT)cT.destroy();
   cT=new Chart(document.getElementById('ch-t'),{type:'line',data:{labels:days,datasets:[{data:days.map(function(d2){return dC[d2];}),borderColor:'#1a1916',backgroundColor:'rgba(26,25,22,0.07)',fill:true,tension:0.35,pointRadius:4,pointBackgroundColor:'#1a1916'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11},color:'#9e9c93'}},y:{ticks:{stepSize:1,color:'#9e9c93'}}}}});
-  var eK=Object.keys(eC);
-  if(cEq)cEq.destroy();
-  cEq=new Chart(document.getElementById('ch-eq'),{type:'bar',data:{labels:eK.map(function(k){return k.length>22?k.slice(0,22)+'…':k;}),datasets:[{data:eK.map(function(k){return eC[k];}),backgroundColor:'#534AB7',borderWidth:0,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#9e9c93'}},y:{ticks:{stepSize:1,color:'#9e9c93'}}}}});
+
+  // ── Gráficos de Medidas de Prevenção ──────────────────
+  var prevNomes = ['Normotermia','Glicemia pré-op','Glicemia pós-op','Preparo da pele','Antissepsia das mãos','Enxaguante bucal'];
+  var prevIds   = ['normotermia','glicemia_pre','glicemia_pos','preparo_pele','antissepsia','enxaguante'];
+  var prevConf=[], prevNConf=[], prevNAv=[], prevNPr=[];
+  var solsComPrev = sols.filter(function(s){ return s.prevencao; });
+  var nComPrev = solsComPrev.length;
+
+  for (var pi=0; pi<prevIds.length; pi++) {
+    var pid = prevIds[pi], nc2=0, nn=0, na=0, np=0;
+    for (var si=0; si<solsComPrev.length; si++) {
+      var vp2 = solsComPrev[si].prevencao[pid];
+      if      (vp2==='conforme')      nc2++;
+      else if (vp2==='nao_conforme')  nn++;
+      else if (vp2==='nao_avaliado')  na++;
+      else                             np++;
+    }
+    prevConf.push(nc2); prevNConf.push(nn); prevNAv.push(na); prevNPr.push(np);
+  }
+
+  // Gráfico de barras empilhadas por medida
+  if(cPrevBar)cPrevBar.destroy();
+  if(document.getElementById('ch-prev-bar') && nComPrev > 0) {
+    cPrevBar = new Chart(document.getElementById('ch-prev-bar'),{
+      type:'bar',
+      data:{ labels:prevNomes.map(function(n){return n.length>16?n.slice(0,16)+'…':n;}),
+        datasets:[
+          {label:'Conforme',    data:prevConf,  backgroundColor:'#2d6a2d', borderWidth:0, borderRadius:2},
+          {label:'Não conforme',data:prevNConf, backgroundColor:'#8b1a1a', borderWidth:0, borderRadius:2},
+          {label:'Não avaliado',data:prevNAv,   backgroundColor:'#ba7500', borderWidth:0, borderRadius:2},
+          {label:'Não preench.',data:prevNPr,   backgroundColor:'#d0cfc8', borderWidth:0, borderRadius:2},
+        ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:8,color:'#6b6960'}}},
+        scales:{x:{stacked:true,ticks:{font:{size:9},color:'#9e9c93'}},y:{stacked:true,ticks:{stepSize:1,color:'#9e9c93'}}}}
+    });
+  }
+
+  // Rosca de completude geral
+  var nCompleto = sols.filter(function(s){ return isCompleto(s); }).length;
+  var nParcial  = sols.filter(function(s){ return s.prevencao && !isCompleto(s); }).length;
+  var nSemPrev  = sols.length - nCompleto - nParcial;
+  if(cPrevComp)cPrevComp.destroy();
+  if(document.getElementById('ch-prev-comp')) {
+    cPrevComp = new Chart(document.getElementById('ch-prev-comp'),{
+      type:'doughnut',
+      data:{ labels:['Completo (todos os campos)','Parcial (alguns campos)','Sem prevenção registrada'],
+        datasets:[{ data:[nCompleto, nParcial, nSemPrev], backgroundColor:['#2d6a2d','#ba7500','#d0cfc8'], borderWidth:0 }]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:8,color:'#6b6960'}}}}
+    });
+  }
 }
 </script>
 </body>
