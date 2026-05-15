@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CCIH — Controle de Antibióticos Profiláticos</title>
+<title>CCIH — Módulo Cirúrgico</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -168,7 +168,7 @@ textarea{resize:vertical;min-height:72px;}
 .ab-del-btn{width:26px;height:26px;border:1px solid var(--border);border-radius:var(--r);background:none;cursor:pointer;color:var(--text3);font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:end;margin-bottom:1px;}
 .ab-del-btn:hover{background:var(--red-bg);color:var(--red);border-color:#f0c0c0;}
 /* MEDIDAS DE PREVENÇÃO */
-.prev-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.prev-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
 .prev-item{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
 .prev-label{font-size:11px;font-family:var(--font-d);letter-spacing:.05em;text-transform:uppercase;color:var(--text2);padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);}
 .prev-opts{display:flex;gap:0;}
@@ -180,10 +180,35 @@ textarea{resize:vertical;min-height:72px;}
 .prev-obs{padding:8px 12px;border-top:1px solid var(--border);display:none;}
 .prev-obs input{font-size:12px;padding:6px 9px;border:1px solid var(--border);border-radius:4px;width:100%;background:var(--bg);}
 .prev-opt.nav{background:var(--amber-bg);color:var(--amber);font-weight:500;}
+/* AUDITORIA */
+.audit-opt{border:2px solid var(--border);border-radius:var(--r);padding:1.1rem 1.25rem;cursor:pointer;transition:all .15s;background:var(--surface);position:relative;}
+.audit-opt:hover{border-color:var(--text3);background:var(--surface2);}
+.audit-opt.sel-cpos{border-color:var(--green);background:var(--green-bg);}
+.audit-opt.sel-cneg{border-color:var(--red);background:var(--red-bg);}
+.audit-opt.sel-ipos{border-color:#7c3aed;background:#f3f0ff;}
+.audit-opt.sel-ineg{border-color:var(--amber);background:var(--amber-bg);}
+.audit-opt-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);display:inline-block;margin-right:10px;vertical-align:middle;flex-shrink:0;transition:all .15s;}
+.audit-opt.sel-cpos .audit-opt-radio{border-color:var(--green);background:var(--green);}
+.audit-opt.sel-cneg .audit-opt-radio{border-color:var(--red);background:var(--red);}
+.audit-opt.sel-ipos .audit-opt-radio{border-color:#7c3aed;background:#7c3aed;}
+.audit-opt.sel-ineg .audit-opt-radio{border-color:var(--amber);background:var(--amber);}
+.audit-opt-titulo{font-size:13px;font-weight:500;color:var(--text);vertical-align:middle;}
+.audit-opt-desc{font-size:11px;color:var(--text3);margin-top:6px;padding-left:26px;line-height:1.5;}
 /* STATUS DE COMPLETUDE */
 .badge-comp{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-family:var(--font-d);padding:3px 9px;border-radius:4px;font-weight:500;white-space:nowrap;}
 .badge-comp.completo{background:var(--green-bg);color:var(--green);}
 .badge-comp.parcial{background:var(--amber-bg);color:var(--amber);}
+/* ISC DETALHAMENTO */
+.isc-detalhe{padding:10px 14px;background:#fffafa;border-top:1px solid #f0c0c0;}
+.isc-grupo{margin-bottom:10px;}
+.isc-grupo-label{font-size:10px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.isc-radios{display:flex;gap:8px;flex-wrap:wrap;}
+.isc-radio{display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border:1.5px solid var(--border);border-radius:var(--r);font-size:12px;color:var(--text2);background:var(--surface);transition:all .12s;user-select:none;}
+.isc-radio:hover{border-color:var(--text3);background:var(--surface2);}
+.isc-radio.sel-isc{border-color:var(--red);background:var(--red-bg);color:var(--red);font-weight:500;}
+.isc-radio input[type=radio]{display:none;}
+.isc-radio-dot{width:13px;height:13px;border-radius:50%;border:2px solid currentColor;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.isc-radio.sel-isc .isc-radio-dot::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--red);display:block;}
 /* BACKUP BUTTONS */
 .hactions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .hbtn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;font-size:12px;font-family:var(--font-b);border-radius:var(--r);cursor:pointer;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);transition:all .15s;white-space:nowrap;}
@@ -230,7 +255,7 @@ textarea{resize:vertical;min-height:72px;}
   <div class="login-box">
     <div class="login-logo">
       <div class="login-logo-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="7" y="1" width="2" height="14" rx="1" fill="#fff"/><rect x="1" y="7" width="14" height="2" rx="1" fill="#fff"/></svg></div>
-      <div><div class="login-title">CCIH</div><div class="login-sub">Controle de Antibióticos Profiláticos</div></div>
+      <div><div class="login-title">CCIH</div><div class="login-sub">Módulo Cirúrgico</div></div>
     </div>
     <div class="login-field">
       <label>E-mail</label>
@@ -249,7 +274,7 @@ textarea{resize:vertical;min-height:72px;}
 <div class="header">
   <div class="hbrand">
     <div class="hlogo"><svg viewBox="0 0 16 16" fill="none"><rect x="7" y="1" width="2" height="14" rx="1" fill="#1a1916"/><rect x="1" y="7" width="14" height="2" rx="1" fill="#1a1916"/></svg></div>
-    <div><div class="htitle">CCIH — Controle de Antibióticos Profiláticos</div><div class="hsub">Sistema de liberação cirúrgica</div></div>
+    <div><div class="htitle">CCIH — Módulo Cirúrgico</div></div>
   </div>
   <div class="hactions">
     <div class="hdate" id="hdate" style="margin-right:4px;"></div>
@@ -286,6 +311,15 @@ textarea{resize:vertical;min-height:72px;}
     </button>
     <button class="nitem" onclick="showTab('prevencao',this)">
       <svg viewBox="0 0 14 14" fill="none"><path d="M7 1l1.5 3.5H12l-2.8 2 1 3.5L7 8l-3.2 2 1-3.5L2 4.5h3.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Medidas de prevenção
+    </button>
+    <button class="nitem" onclick="showTab('auditoria',this)">
+      <svg viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h6M2 11h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="11" cy="10" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M12.8 11.8l1.2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Auditoria de antibióticos
+    </button>
+    <button class="nitem" onclick="showTab('isc',this)">
+      <svg viewBox="0 0 14 14" fill="none"><path d="M7 1C4 1 2 3.5 2 7s2 6 5 6 5-2.5 5-6-2-6-5-6z" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v4M7 9.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Infecção de sítio cirúrgico
+    </button>
+    <button class="nitem" onclick="showTab('taxaisc',this)">
+      <svg viewBox="0 0 14 14" fill="none"><path d="M1 11L4 7l3 2 3-5 2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 13h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M10 3h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Taxa de ISC
     </button>
     <button class="nitem" onclick="showTab('registros',this)">
       <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M4 5h6M4 7.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Todos os registros
@@ -427,8 +461,8 @@ textarea{resize:vertical;min-height:72px;}
       <input type="date" id="fr-de" onchange="renderReg()" title="A partir de">
       <input type="date" id="fr-ate" onchange="renderReg()" title="Até">
     </div>
-    <table><thead><tr><th>Atendimento</th><th>Procedimento</th><th>Antibiótico</th><th>Valor</th><th>Equipe</th><th>Médico</th><th>Data</th><th>Duração</th><th>Status</th><th>Ações</th></tr></thead>
-    <tbody id="all-tbody"><tr><td colspan="10" class="empty">Nenhum registro encontrado.</td></tr></tbody></table>
+    <table><thead><tr><th>Atendimento</th><th>Procedimento</th><th>Antibiótico</th><th>Valor</th><th>Equipe</th><th>Médico</th><th>Data</th><th>Duração</th><th>Status</th><th>Auditoria</th><th>Ações</th></tr></thead>
+    <tbody id="all-tbody"><tr><td colspan="11" class="empty">Nenhum registro encontrado.</td></tr></tbody></table>
   </div>
 </div>
 
@@ -641,6 +675,46 @@ textarea{resize:vertical;min-height:72px;}
   </div>
 </div>
 
+<!-- AUDITORIA DE ANTIBIÓTICOS -->
+<div class="section" id="tab-auditoria">
+  <div class="phdr">
+    <div><div class="ptitle">Auditoria de antibióticos</div><div class="psub">Classificação de congruência — preenchida após a solicitação</div></div>
+  </div>
+  <div id="audit-alert" class="alert"></div>
+
+  <!-- Seletor de registro -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="ctitle" style="margin-bottom:1rem;">Selecione o registro</div>
+    <div class="frow">
+      <select id="audit-sel" onchange="onAuditSelChange()" style="font-size:13px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);flex:1;max-width:560px;">
+        <option value="">Selecione um atendimento...</option>
+      </select>
+    </div>
+    <div id="audit-info" style="margin-top:10px;font-size:12px;color:var(--text3);display:none;"></div>
+  </div>
+
+  <!-- Formulário de auditoria -->
+  <div class="card" id="audit-form-card" style="display:none;">
+    <div class="ctitle" style="margin-bottom:.5rem;">Classificação de congruência</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:1.5rem;">Selecione apenas uma das opções abaixo</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem;" id="audit-opcoes">
+      <!-- gerado pelo JS -->
+    </div>
+
+    <div class="fg full" style="margin-bottom:1rem;">
+      <label style="font-size:11px;font-family:var(--font-d);letter-spacing:.05em;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:5px;">Observações da auditoria (opcional)</label>
+      <textarea id="audit-obs" placeholder="Justificativa ou comentários do auditor..." style="font-size:13px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);width:100%;min-height:72px;resize:vertical;"></textarea>
+    </div>
+    <div class="brow">
+      <button class="btn pri" onclick="salvarAuditoria()">✓ Salvar auditoria</button>
+    </div>
+  </div>
+
+  <!-- Resumo após salvar -->
+  <div class="card" id="audit-resumo" style="display:none;"></div>
+</div>
+
 <!-- GRÁFICOS -->
 <div class="section" id="tab-graficos">
   <div class="phdr"><div><div class="ptitle">Gráficos</div><div class="psub">Indicadores de uso de antibióticos profiláticos</div></div></div>
@@ -696,16 +770,210 @@ textarea{resize:vertical;min-height:72px;}
     <div class="ctitle" style="margin-bottom:.5rem;">Conformidade das medidas de prevenção</div>
     <div style="font-size:11px;color:var(--text3);font-family:var(--font-d);margin-bottom:1rem;">Percentual de conformidade por medida — registros com prevenção preenchida</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-      <div style="height:240px;"><canvas id="ch-prev-bar" role="img" aria-label="Medidas de prevenção">.</canvas></div>
-      <div style="height:240px;"><canvas id="ch-prev-comp" role="img" aria-label="Completude">.</canvas></div>
+      <div style="height:240px;"><canvas id="ch-prev-bar" role="img">.</canvas></div>
+      <div style="height:240px;"><canvas id="ch-prev-comp" role="img">.</canvas></div>
+    </div>
+  </div>
+
+  <!-- AUDITORIA DE ANTIBIÓTICOS -->
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div class="ctitle">Auditoria de antibióticos</div>
+        <div style="font-size:11px;color:var(--text3);font-family:var(--font-d);margin-top:3px;">Classificação de congruência dos registros auditados</div>
+      </div>
+      <div id="audit-gasto-alert" style="display:none;background:var(--red-bg);border:1.5px solid #f0c0c0;border-radius:var(--r);padding:8px 14px;font-size:12px;color:var(--red);font-family:var(--font-d);font-weight:500;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;" id="audit-metrics"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div style="height:240px;"><canvas id="ch-audit-rosca" role="img">.</canvas></div>
+      <div style="height:240px;"><canvas id="ch-audit-bar" role="img">.</canvas></div>
+    </div>
+  </div>
+
+  <!-- INFECÇÃO DE SÍTIO CIRÚRGICO — GRÁFICOS -->
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div class="ctitle">Infecção de sítio cirúrgico (ISC)</div>
+        <div style="font-size:11px;color:var(--text3);font-family:var(--font-d);margin-top:3px;">Cirurgias com ISC confirmada por equipe e médico</div>
+      </div>
+      <div id="isc-taxa-alert" style="display:none;background:var(--red-bg);border:1.5px solid #f0c0c0;border-radius:var(--r);padding:8px 14px;font-size:12px;color:var(--red);font-family:var(--font-d);font-weight:500;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem;" id="isc-graf-metrics"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div>
+        <div style="font-size:11px;font-family:var(--font-d);color:var(--text3);margin-bottom:8px;">ISC por equipe cirúrgica</div>
+        <div style="height:220px;"><canvas id="ch-isc-eq" role="img">.</canvas></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-family:var(--font-d);color:var(--text3);margin-bottom:8px;">ISC por médico (top 8)</div>
+        <div style="height:220px;"><canvas id="ch-isc-med" role="img">.</canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAXA DE ISC — GRÁFICOS -->
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div class="ctitle">Taxa de ISC — análise comparativa</div>
+        <div style="font-size:11px;color:var(--text3);font-family:var(--font-d);margin-top:3px;">Total de cirurgias realizadas × ISC confirmadas por mês e equipe</div>
+      </div>
+      <div id="taxa-graf-alert" style="display:none;background:var(--red-bg);border:1.5px solid #f0c0c0;border-radius:var(--r);padding:8px 14px;font-size:12px;color:var(--red);font-family:var(--font-d);font-weight:500;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;" id="taxa-graf-metrics"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <div style="font-size:11px;font-family:var(--font-d);color:var(--text3);margin-bottom:8px;">Taxa de ISC por mês (%)</div>
+        <div style="height:220px;"><canvas id="ch-taxa-mes" role="img">.</canvas></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-family:var(--font-d);color:var(--text3);margin-bottom:8px;">Total de cirurgias × ISC por equipe</div>
+        <div style="height:220px;"><canvas id="ch-taxa-eq" role="img">.</canvas></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-family:var(--font-d);color:var(--text3);margin-bottom:8px;">Evolução mensal — cirurgias totais vs ISC</div>
+      <div style="height:200px;"><canvas id="ch-taxa-evolucao" role="img">.</canvas></div>
+    </div>
+  </div>
+</div>
+<div class="section" id="tab-isc">
+  <div class="phdr">
+    <div><div class="ptitle">Infecção de sítio cirúrgico</div><div class="psub">Identificação de cirurgias com infecção pós-operatória</div></div>
+  </div>
+  <div id="isc-alert" class="alert"></div>
+
+  <!-- Busca e filtros -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="ctitle" style="margin-bottom:1rem;">Buscar cirurgia</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <input type="text" id="isc-busca" placeholder="Buscar por atendimento, paciente, procedimento ou médico..." oninput="renderISC()"
+        style="font-size:13px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);flex:1;min-width:220px;">
+      <select id="isc-filtro-eq" onchange="renderISC()" style="font-size:12px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);">
+        <option value="">Todas as equipes</option>
+      </select>
+      <select id="isc-filtro-isc" onchange="renderISC()" style="font-size:12px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);">
+        <option value="">Todos os registros</option>
+        <option value="sim">Com infecção</option>
+        <option value="nao">Sem infecção</option>
+      </select>
+      <input type="date" id="isc-de"  onchange="renderISC()" title="A partir de" style="font-size:12px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);">
+      <input type="date" id="isc-ate" onchange="renderISC()" title="Até"         style="font-size:12px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);">
+    </div>
+    <!-- Métricas rápidas -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:1rem;" id="isc-metrics"></div>
+  </div>
+
+  <!-- Lista de cirurgias -->
+  <div class="card">
+    <div class="ctitle" style="margin-bottom:1rem;">Registros</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Atendimento</th>
+            <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Paciente</th>
+            <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Procedimento</th>
+            <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Equipe</th>
+            <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Médico</th>
+            <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Data</th>
+            <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Antibiótico</th>
+            <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:center;padding:7px 10px;border-bottom:1px solid var(--border);">Infecção ISC</th>
+          </tr>
+        </thead>
+        <tbody id="isc-tbody"><tr><td colspan="8" class="empty">Nenhum registro encontrado.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TAXA DE ISC -->
+<div class="section" id="tab-taxaisc">
+  <div class="phdr">
+    <div><div class="ptitle">Taxa de ISC</div><div class="psub">Registro do total de cirurgias por mês e equipe para cálculo de taxa</div></div>
+  </div>
+  <div id="taxaisc-alert" class="alert"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:1rem;align-items:start;">
+
+    <!-- FORMULÁRIO DE REGISTRO -->
+    <div class="card">
+      <div class="ctitle" style="margin-bottom:1.25rem;">Registrar total de cirurgias</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="fg">
+          <label>Mês / Ano</label>
+          <input type="month" id="taxa-mes" style="font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);width:100%;">
+        </div>
+        <div class="fg">
+          <label>Equipe cirúrgica</label>
+          <select id="taxa-equipe" style="font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);width:100%;">
+            <option value="">Selecione a equipe...</option>
+            <option value="GERAL">GERAL (todas as equipes)</option>
+            <option value="SAD">SAD</option><option value="SCP">SCP</option><option value="SUR">SUR</option>
+            <option value="SMP">SMP</option><option value="SOT">SOT</option><option value="SOP">SOP</option>
+            <option value="SOD">SOD</option><option value="SNO">SNO</option><option value="SGM">SGM</option>
+            <option value="SOR">SOR</option><option value="SPL">SPL</option><option value="VAS">VAS</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Total de cirurgias realizadas</label>
+          <input type="number" id="taxa-total" min="0" placeholder="Ex: 142" style="font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);width:100%;">
+        </div>
+        <div class="fg">
+          <label>Observações (opcional)</label>
+          <textarea id="taxa-obs" placeholder="Ex: dados parciais, férias coletivas..." style="font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);width:100%;min-height:56px;resize:vertical;"></textarea>
+        </div>
+        <button class="btn pri" onclick="salvarTaxaISC()" style="align-self:flex-start;">✓ Salvar registro</button>
+      </div>
+    </div>
+
+    <!-- TABELA DE ANÁLISE -->
+    <div>
+      <div class="card" style="margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;">
+          <div class="ctitle">Análise por mês e equipe</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="taxa-filtro-eq" onchange="renderTaxaISC()" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);">
+              <option value="">Todas as equipes</option>
+              <option value="GERAL">GERAL</option>
+              <option value="SAD">SAD</option><option value="SCP">SCP</option><option value="SUR">SUR</option>
+              <option value="SMP">SMP</option><option value="SOT">SOT</option><option value="SOP">SOP</option>
+              <option value="SOD">SOD</option><option value="SNO">SNO</option><option value="SGM">SGM</option>
+              <option value="SOR">SOR</option><option value="SPL">SPL</option><option value="VAS">VAS</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Métricas resumo -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;" id="taxa-metrics"></div>
+
+        <!-- Tabela -->
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Mês</th>
+                <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Equipe</th>
+                <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:right;padding:7px 10px;border-bottom:1px solid var(--border);">Total cirug.</th>
+                <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:right;padding:7px 10px;border-bottom:1px solid var(--border);">ISC registradas</th>
+                <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:right;padding:7px 10px;border-bottom:1px solid var(--border);">Taxa ISC %</th>
+                <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:center;padding:7px 10px;border-bottom:1px solid var(--border);">Alerta</th>
+                <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:center;padding:7px 10px;border-bottom:1px solid var(--border);">Meta 2026</th>
+                <th style="padding:7px 10px;border-bottom:1px solid var(--border);"></th>
+              </tr>
+            </thead>
+            <tbody id="taxa-tbody"><tr><td colspan="8" class="empty">Nenhum registro de total de cirurgias cadastrado.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 </main>
 </div>
-
-<!-- MODAL -->
 <div class="ov" id="modal" onclick="fechaMod(event)">
   <div class="modal">
     <div class="mhdr"><div class="mtitle" id="mtitle">Detalhes</div><button class="mclose" onclick="document.getElementById('modal').classList.remove('on')">×</button></div>
@@ -779,6 +1047,7 @@ auth.onAuthStateChanged(function(user) {
 var _primeiroCarregamento = true;
 var _ultimoUpdate = null;
 var _pollingTimer = null;
+var _bloqueioReRender = false; // impede re-render após salvar auditoria/prevenção
 
 function ativarSincronizacaoTempoReal() {
   atualizarSync('sincronizando');
@@ -827,11 +1096,24 @@ function aplicarDados(d) {
   procs  = Array.isArray(d.procs)  ? d.procs  : [];
   abs    = Array.isArray(d.abs)    ? d.abs    : [];
   anests = Array.isArray(d.anests) ? d.anests : [];
+  totaisCirurgias = Array.isArray(d.totaisCirurgias) ? d.totaisCirurgias : [];
   salvarLocal();
   atualizarSync('ok');
-  // Atualiza a aba que está aberta no momento
+
   var tabAtiva = document.querySelector('.section.active');
   var id = tabAtiva ? tabAtiva.id.replace('tab-','') : 'dashboard';
+
+  // Não re-renderiza auditoria nem prevenção se já exibem o resumo salvo
+  // (evita desfazer o estado visual após salvar)
+  if (_bloqueioReRender) return;
+  if (id === 'auditoria') {
+    var resumoAudit = document.getElementById('audit-resumo');
+    if (resumoAudit && resumoAudit.style.display === 'block') return;
+  }
+  if (id === 'prevencao') {
+    var resumoPrev = document.getElementById('prev-resumo-salvo');
+    if (resumoPrev && resumoPrev.style.display === 'block') return;
+  }
   if (TAB_FNS[id]) { try { TAB_FNS[id](); } catch(e){} }
   if (_primeiroCarregamento) {
     try { renderLinhasAb(); } catch(e) {}
@@ -890,7 +1172,7 @@ function atualizarSync(s) {
    ========================================================= */
 var sols=[], meds=[], eqs=[], procs=[], abs=[], anests=[];
 var selMed=null,selEq=null,selPick=null,selProc=null,selAb=null,selAnest=null;
-var cSeg=null,cSegProc=null,cAb=null,cT=null,cEq=null,cPrevBar=null,cPrevComp=null;
+var cSeg=null,cSegProc=null,cAb=null,cT=null,cEq=null,cPrevBar=null,cPrevComp=null,cAuditRosca=null,cAuditBar=null,cIscEq=null,cIscMed=null,cTaxaMes=null,cTaxaEq=null,cTaxaEvolucao=null;
 var abLinhas=[];
 var EQUIPES_FIXAS=['SAD','SCP','SUR','SMP','SOT','SOP','SOD','SNO','SGM','SOR','SPL','VAS'];
 
@@ -902,6 +1184,8 @@ var TAB_FNS={
   medicos:function(){renderMeds();},procedimentos:function(){renderProcs();},
   antibioticos:function(){renderAbs();},anestesistas:function(){renderAnests();},
   nova:function(){popNova();},prevencao:function(){popPrevencao();},
+  auditoria:function(){popAuditoria();},isc:function(){renderISC();},
+  taxaisc:function(){renderTaxaISC();},
   graficos:function(){setTimeout(function(){renderCharts();},80);}
 };
 function showTab(id,btn){
@@ -915,12 +1199,18 @@ function showTab(id,btn){
    MEDIDAS DE PREVENÇÃO
    ========================================================= */
 var PREV_CAMPOS = [
-  { id:'normotermia',    label:'Normotermia',           temNaoAv: false },
-  { id:'glicemia_pre',   label:'Glicemia pré-operatório', temNaoAv: false },
-  { id:'glicemia_pos',   label:'Glicemia pós-operatório', temNaoAv: false },
-  { id:'preparo_pele',   label:'Preparo da pele',        temNaoAv: true  },
-  { id:'antissepsia',    label:'Antissepsia das mãos',   temNaoAv: true  },
-  { id:'enxaguante',     label:'Enxaguante bucal',       temNaoAv: false }
+  { id:'normotermia',       label:'Normotermia',               temNaoAv: false, temNA: false, somenteEquipe: null },
+  { id:'glicemia_pre',      label:'Glicemia pré-operatório',   temNaoAv: false, temNA: false, somenteEquipe: null },
+  { id:'glicemia_pos',      label:'Glicemia pós-operatório',   temNaoAv: false, temNA: false, somenteEquipe: null },
+  { id:'banho_pre',         label:'Banho pré-operatório',      temNaoAv: false, temNA: false, somenteEquipe: null },
+  { id:'tricotomia',        label:'Tricotomia',                temNaoAv: false, temNA: true,  somenteEquipe: null },
+  { id:'preparo_pele',      label:'Preparo da pele',           temNaoAv: true,  temNA: false, somenteEquipe: null },
+  { id:'degermacao',        label:'Degermação das mãos',       temNaoAv: true,  temNA: false, somenteEquipe: null },
+  { id:'controle_pessoal',  label:'Controle de pessoal em sala', temNaoAv: false, temNA: false, somenteEquipe: null },
+  { id:'desinfeccao_sala',  label:'Desinfecção de sala',       temNaoAv: false, temNA: false, somenteEquipe: null },
+  { id:'sem_adornos',       label:'Sem adornos',               temNaoAv: false, temNA: false, somenteEquipe: null },
+  { id:'antissepsia_bucal', label:'Antissepsia bucal',         temNaoAv: false, temNA: false, somenteEquipe: null },
+  { id:'preparo_colorretal',label:'Preparo ATM do colorretal', temNaoAv: false, temNA: true,  somenteEquipe: 'SAD' }
 ];
 
 function isCompleto(s) {
@@ -937,6 +1227,10 @@ function badgeComp(s) {
 }
 
 function popPrevencao() {
+  // Se o resumo já está visível (após salvar), não reseta o estado
+  var fr = document.getElementById('prev-resumo-salvo');
+  if (fr && fr.style.display === 'block') return;
+
   var sel = document.getElementById('prev-sel');
   var curVal = sel.value;
   sel.innerHTML = '<option value="">Selecione um atendimento...</option>';
@@ -959,6 +1253,7 @@ function popPrevencao() {
 }
 
 function onPrevSelChange() {
+  _bloqueioReRender = false;
   var id = document.getElementById('prev-sel').value;
   var fc = document.getElementById('prev-form-card');
   var fi = document.getElementById('prev-info');
@@ -971,24 +1266,29 @@ function onPrevSelChange() {
   fi.innerHTML = '<strong>' + (s.atendimento||s.prontuario||'') + '</strong> · ' + (s.procedimento||'') + ' · ' + (s.solicitante||'') + ' · ' + fmtDate(s.dataCirurgia||s.data);
   if (fr) fr.style.display = 'none';
   fc.style.display = 'block';
-  renderPrevCampos(s.prevencao || {});
+  renderPrevCampos(s.prevencao || {}, s.equipeNome || '');
 }
 
-function renderPrevCampos(prev) {
+function renderPrevCampos(prev, equipeNome) {
   var html = '';
+  var eq = (equipeNome || '').toUpperCase();
   for (var i = 0; i < PREV_CAMPOS.length; i++) {
     var c = PREV_CAMPOS[i];
-    var val = prev[c.id] || '';
+    // Campo SAD: mostra só se equipe contém SAD
+    if (c.somenteEquipe && eq.indexOf(c.somenteEquipe) === -1) continue;
+    var val    = prev[c.id] || '';
     var obsVal = prev[c.id + '_obs'] || '';
     var isConf  = val === 'conforme';
     var isNConf = val === 'nao_conforme';
     var isNAv   = val === 'nao_avaliado';
+    var isNA    = val === 'na';
     html += '<div class="prev-item">' +
       '<div class="prev-label">' + c.label + '</div>' +
       '<div class="prev-opts">' +
         '<button class="prev-opt' + (isConf  ? ' conf'  : '') + '" onclick="setPrev(\'' + c.id + '\',\'conforme\')"     id="btn_conf_'  + c.id + '">Conforme</button>' +
         '<button class="prev-opt' + (isNConf ? ' nconf' : '') + '" onclick="setPrev(\'' + c.id + '\',\'nao_conforme\')" id="btn_nconf_' + c.id + '">Não conforme</button>' +
         (c.temNaoAv ? '<button class="prev-opt' + (isNAv ? ' nav' : '') + '" onclick="setPrev(\'' + c.id + '\',\'nao_avaliado\')" id="btn_nav_' + c.id + '">Não avaliado</button>' : '') +
+        (c.temNA    ? '<button class="prev-opt' + (isNA  ? ' nav' : '') + '" onclick="setPrev(\'' + c.id + '\',\'na\')"            id="btn_na_'  + c.id + '">NA</button>' : '') +
       '</div>' +
       '<div class="prev-obs" id="obs_' + c.id + '" style="display:' + (isNConf ? 'block' : 'none') + ';">' +
         '<input type="text" id="val_' + c.id + '" value="' + obsVal + '" placeholder="Especifique o motivo...">' +
@@ -1002,16 +1302,17 @@ function setPrev(campo, valor) {
   var btnConf  = document.getElementById('btn_conf_'  + campo);
   var btnNConf = document.getElementById('btn_nconf_' + campo);
   var btnNAv   = document.getElementById('btn_nav_'   + campo);
+  var btnNA    = document.getElementById('btn_na_'    + campo);
   var obsDiv   = document.getElementById('obs_' + campo);
-  // Limpa todos
   if (btnConf)  btnConf.className  = 'prev-opt';
   if (btnNConf) btnNConf.className = 'prev-opt';
   if (btnNAv)   btnNAv.className   = 'prev-opt';
+  if (btnNA)    btnNA.className    = 'prev-opt';
   if (obsDiv)   obsDiv.style.display = 'none';
-  // Ativa o selecionado
-  if (valor === 'conforme'      && btnConf)  btnConf.className  = 'prev-opt conf';
-  if (valor === 'nao_conforme'  && btnNConf) { btnNConf.className = 'prev-opt nconf'; if(obsDiv){obsDiv.style.display='block'; document.getElementById('val_'+campo).focus();} }
-  if (valor === 'nao_avaliado'  && btnNAv)   btnNAv.className   = 'prev-opt nav';
+  if (valor === 'conforme'     && btnConf)  btnConf.className  = 'prev-opt conf';
+  if (valor === 'nao_conforme' && btnNConf) { btnNConf.className = 'prev-opt nconf'; if(obsDiv){obsDiv.style.display='block'; document.getElementById('val_'+campo).focus();} }
+  if (valor === 'nao_avaliado' && btnNAv)   btnNAv.className   = 'prev-opt nav';
+  if (valor === 'na'           && btnNA)    btnNA.className     = 'prev-opt nav';
 }
 
 function salvarPrevencao() {
@@ -1021,53 +1322,749 @@ function salvarPrevencao() {
   for (var i = 0; i < sols.length; i++) if (String(sols[i].id) === String(id)) { idx = i; break; }
   if (idx === -1) { alert2('prev-alert','Registro não encontrado.','er'); return; }
   var prev = {};
+  var idx2 = sols[idx];
+  var eqAtual = (idx2 && idx2.equipeNome) ? idx2.equipeNome.toUpperCase() : '';
   for (var j = 0; j < PREV_CAMPOS.length; j++) {
     var c = PREV_CAMPOS[j];
+    if (c.somenteEquipe && eqAtual.indexOf(c.somenteEquipe) === -1) continue;
     var btnConf  = document.getElementById('btn_conf_'  + c.id);
     var btnNConf = document.getElementById('btn_nconf_' + c.id);
     var btnNAv   = document.getElementById('btn_nav_'   + c.id);
+    var btnNA    = document.getElementById('btn_na_'    + c.id);
     if      (btnConf  && btnConf.className.indexOf('conf')  !== -1 && btnConf.className.indexOf('nconf') === -1) { prev[c.id] = 'conforme'; }
-    else if (btnNConf && btnNConf.className.indexOf('nconf') !== -1) { prev[c.id] = 'nao_conforme'; prev[c.id+'_obs'] = document.getElementById('val_'+c.id).value; }
+    else if (btnNConf && btnNConf.className.indexOf('nconf') !== -1) { prev[c.id] = 'nao_conforme'; prev[c.id+'_obs'] = document.getElementById('val_'+c.id) ? document.getElementById('val_'+c.id).value : ''; }
     else if (btnNAv   && btnNAv.className.indexOf('nav')    !== -1) { prev[c.id] = 'nao_avaliado'; }
+    else if (btnNA    && btnNA.className.indexOf('nav')     !== -1) { prev[c.id] = 'na'; }
   }
   sols[idx].prevencao = prev;
+  _bloqueioReRender = true;
   save();
 
-  // Fecha o formulário e exibe resumo do que foi salvo
+  // Oculta TUDO — card do seletor, info, formulário (igual à auditoria)
+  var elSel = document.getElementById('prev-sel');
+  if (elSel && elSel.parentNode && elSel.parentNode.parentNode) {
+    elSel.parentNode.parentNode.style.display = 'none';
+  }
   document.getElementById('prev-form-card').style.display = 'none';
   document.getElementById('prev-info').style.display = 'none';
+
   var fr = document.getElementById('prev-resumo-salvo');
   if (fr) {
-    var nomes = {'normotermia':'Normotermia','glicemia_pre':'Glicemia pré-op','glicemia_pos':'Glicemia pós-op','preparo_pele':'Preparo da pele','antissepsia':'Antissepsia das mãos','enxaguante':'Enxaguante bucal'};
-    var cores = { conforme:'color:var(--green)', nao_conforme:'color:var(--red)', nao_avaliado:'color:var(--amber)' };
-    var labels = { conforme:'Conforme', nao_conforme:'Não conforme', nao_avaliado:'Não avaliado' };
-    var resumoHtml = '<div style="font-family:var(--font-d);font-size:12px;font-weight:500;margin-bottom:10px;color:var(--green);">✓ Medidas de prevenção salvas com sucesso!</div>';
-    resumoHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
-    for (var campo in nomes) {
-      var vl = prev[campo] || '—';
-      var cor = cores[vl] || 'color:var(--text3)';
-      var lb  = labels[vl] || 'Não preenchido';
-      var obs2 = (vl === 'nao_conforme' && prev[campo+'_obs']) ? ' — ' + prev[campo+'_obs'] : '';
-      resumoHtml += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;">' +
-        '<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">' + nomes[campo] + '</div>' +
-        '<div style="font-size:12px;font-weight:500;' + cor + '">' + lb + obs2 + '</div>' +
+    var nomesMap = {
+      normotermia:'Normotermia', glicemia_pre:'Glicemia pré-op', glicemia_pos:'Glicemia pós-op',
+      banho_pre:'Banho pré-op', tricotomia:'Tricotomia', preparo_pele:'Preparo da pele',
+      degermacao:'Degermação das mãos', controle_pessoal:'Controle de pessoal', desinfeccao_sala:'Desinfecção de sala',
+      sem_adornos:'Sem adornos', antissepsia_bucal:'Antissepsia bucal', preparo_colorretal:'Preparo ATM colorretal'
+    };
+    var bgCores  = { conforme:'#e8f3e8', nao_conforme:'#fdeaea', nao_avaliado:'#fef3d9', na:'#f0efe9' };
+    var txtCores = { conforme:'var(--green)', nao_conforme:'var(--red)', nao_avaliado:'var(--amber)', na:'var(--text3)' };
+    var bdCores  = { conforme:'#b8dbb8', nao_conforme:'#f0c0c0', nao_avaliado:'#f5dda0', na:'var(--border)' };
+    var icons    = { conforme:'✓', nao_conforme:'✗', nao_avaliado:'—', na:'NA' };
+    var labels   = { conforme:'Conforme', nao_conforme:'Não conforme', nao_avaliado:'Não avaliado', na:'NA' };
+
+    var solAtual = sols[idx];
+    var pacInfo  = (solAtual.iniciais ? '<strong>' + solAtual.iniciais + '</strong> · ' : '') +
+      (solAtual.atendimento||solAtual.prontuario||'') +
+      (solAtual.procedimento ? ' · ' + solAtual.procedimento : '') +
+      ' · ' + fmtDate(solAtual.dataCirurgia||solAtual.data);
+
+    var resumoHtml =
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">' +
+        '<div>' +
+          '<div style="font-family:var(--font-d);font-size:13px;font-weight:500;color:var(--green);">✓ Medidas de prevenção salvas com sucesso!</div>' +
+          '<div style="font-size:12px;color:var(--text3);margin-top:3px;">' + pacInfo + '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;">' +
+          '<button class="btn" style="font-size:12px;padding:5px 14px;" onclick="reabrirPrevencao(\'' + id + '\')">✎ Editar</button>' +
+          '<button class="btn pri" style="font-size:12px;" onclick="novaPrevencao()">+ Novo registro</button>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">';
+
+    // Itera na ordem dos campos (não em prev, para manter ordem correta)
+    for (var pi2 = 0; pi2 < PREV_CAMPOS.length; pi2++) {
+      var pc2 = PREV_CAMPOS[pi2];
+      if (pc2.somenteEquipe && eqAtual.indexOf(pc2.somenteEquipe) === -1) continue;
+      var vl  = prev[pc2.id] || '';
+      var bg  = bgCores[vl]  || 'var(--surface2)';
+      var clr = txtCores[vl] || 'var(--text3)';
+      var bd  = bdCores[vl]  || 'var(--border)';
+      var ic  = icons[vl]    || '—';
+      var lb  = labels[vl]   || 'Não preenchido';
+      var nm  = nomesMap[pc2.id] || pc2.id;
+      var opacity = vl ? '' : 'opacity:.5;';
+      var obsStr  = (vl === 'nao_conforme' && prev[pc2.id+'_obs']) ? '<div style="font-size:9px;color:'+clr+';opacity:.8;margin-top:3px;">'+prev[pc2.id+'_obs']+'</div>' : '';
+      resumoHtml +=
+        '<div style="background:'+bg+';border:2px solid '+bd+';border-radius:var(--r);padding:10px 12px;'+opacity+'">' +
+          '<div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">' + nm + '</div>' +
+          '<div style="font-size:22px;font-weight:700;color:'+clr+';line-height:1;">' + ic + '</div>' +
+          '<div style="font-size:10px;font-weight:500;color:'+clr+';margin-top:4px;">' + lb + '</div>' +
+          obsStr +
         '</div>';
     }
     resumoHtml += '</div>';
-    resumoHtml += '<div style="margin-top:12px;"><button class="btn" onclick="onPrevSelChange()">Editar</button></div>';
     fr.innerHTML = resumoHtml;
     fr.style.display = 'block';
   }
-  // Atualiza o select com o novo status e reexibe info do paciente
-  var solAtual = sols[idx];
+}
+
+function reabrirPrevencao(id) {
+  _bloqueioReRender = false;
+  var elSel = document.getElementById('prev-sel');
+  if (elSel && elSel.parentNode && elSel.parentNode.parentNode) {
+    elSel.parentNode.parentNode.style.display = 'block';
+  }
+  document.getElementById('prev-resumo-salvo').style.display = 'none';
   popPrevencao();
   document.getElementById('prev-sel').value = id;
-  var fi2 = document.getElementById('prev-info');
-  if (fi2) {
-    fi2.style.display = 'block';
-    fi2.innerHTML = '<strong>' + (solAtual.iniciais ? solAtual.iniciais + ' · ' : '') + (solAtual.atendimento||solAtual.prontuario||'') + '</strong> · ' + (solAtual.procedimento||'') + ' · ' + fmtDate(solAtual.dataCirurgia||solAtual.data) + ' &nbsp;<span style="color:var(--green);font-weight:500;">✓ Prevenção salva</span>';
+  onPrevSelChange();
+}
+
+function novaPrevencao() {
+  _bloqueioReRender = false;
+  var elSel = document.getElementById('prev-sel');
+  if (elSel && elSel.parentNode && elSel.parentNode.parentNode) {
+    elSel.parentNode.parentNode.style.display = 'block';
+  }
+  document.getElementById('prev-resumo-salvo').style.display = 'none';
+  document.getElementById('prev-form-card').style.display = 'none';
+  document.getElementById('prev-info').style.display = 'none';
+  popPrevencao();
+}
+/* =========================================================
+   AUDITORIA DE ANTIBIÓTICOS
+   ========================================================= */
+var AUDIT_OPCOES = [
+  {
+    id: 'congruencia_positiva',
+    cls: 'sel-cpos',
+    titulo: 'Congruência positiva',
+    desc: 'Antibiótico indicado e utilizado corretamente — espectro, dose e duração adequados ao procedimento.'
+  },
+  {
+    id: 'congruencia_negativa',
+    cls: 'sel-cneg',
+    titulo: 'Congruência negativa',
+    desc: 'Antibiótico não indicado e não utilizado — decisão correta de não prescrever profilaxia.'
+  },
+  {
+    id: 'incongruencia_positiva',
+    cls: 'sel-ipos',
+    titulo: 'Incongruência positiva',
+    desc: 'Antibiótico não indicado mas utilizado — uso desnecessário ou fora das diretrizes.'
+  },
+  {
+    id: 'incongruencia_negativa',
+    cls: 'sel-ineg',
+    titulo: 'Incongruência negativa',
+    desc: 'Antibiótico indicado mas não utilizado — omissão de profilaxia necessária.'
+  }
+];
+
+var _auditSelId = null;
+
+function isAuditado(s) {
+  return s.auditoria && s.auditoria.classificacao;
+}
+
+function badgeAudit(s) {
+  if (!s.auditoria || !s.auditoria.classificacao) return '<span class="badge-comp parcial">⚠ Sem auditoria</span>';
+  var labels = {
+    congruencia_positiva:  'Cong. positiva',
+    congruencia_negativa:  'Cong. negativa',
+    incongruencia_positiva:'Incong. positiva',
+    incongruencia_negativa:'Incong. negativa'
+  };
+  var cores = {
+    congruencia_positiva:  'background:var(--green-bg);color:var(--green);',
+    congruencia_negativa:  'background:var(--red-bg);color:var(--red);',
+    incongruencia_positiva:'background:#f3f0ff;color:#7c3aed;',
+    incongruencia_negativa:'background:var(--amber-bg);color:var(--amber);'
+  };
+  var cl = s.auditoria.classificacao;
+  return '<span class="badge-comp" style="' + (cores[cl]||'') + '">' + (labels[cl]||cl) + '</span>';
+}
+
+function popAuditoria() {
+  var sel = document.getElementById('audit-sel');
+  var curVal = sel ? sel.value : '';
+  if (sel) {
+    sel.innerHTML = '<option value="">Selecione um atendimento...</option>';
+    var lista = sols.slice().sort(function(a,b){
+      var da = a.dataCirurgia||''; var db2 = b.dataCirurgia||'';
+      return db2.localeCompare(da);
+    });
+    for (var i = 0; i < lista.length; i++) {
+      var s = lista[i];
+      var status = isAuditado(s) ? ' ✓' : ' ⚠';
+      sel.innerHTML += '<option value="' + s.id + '"' + (String(s.id)===String(curVal)?' selected':'') + '>' +
+        (s.iniciais ? s.iniciais + ' · ' : '') +
+        (s.atendimento||s.prontuario||s.id) + ' — ' + (s.procedimento||'') +
+        ' (' + fmtDate(s.dataCirurgia||s.data) + ')' + status + '</option>';
+    }
+  }
+  document.getElementById('audit-form-card').style.display = 'none';
+  document.getElementById('audit-resumo').style.display = 'none';
+  document.getElementById('audit-info').style.display = 'none';
+  onAuditSelChange();
+}
+
+function onAuditSelChange() {
+  var id = document.getElementById('audit-sel').value;
+  var fc = document.getElementById('audit-form-card');
+  var fi = document.getElementById('audit-info');
+  var fr = document.getElementById('audit-resumo');
+  if (!id) { fc.style.display='none'; fi.style.display='none'; fr.style.display='none'; return; }
+  var s = null;
+  for (var i = 0; i < sols.length; i++) if (String(sols[i].id) === String(id)) { s = sols[i]; break; }
+  if (!s) return;
+  _auditSelId = id;
+  fi.style.display = 'block';
+  fi.innerHTML = '<strong>' + (s.iniciais ? s.iniciais + ' · ' : '') + (s.atendimento||s.prontuario||'') + '</strong>' +
+    (s.procedimento ? ' · ' + s.procedimento : '') +
+    (s.antibiotico ? ' · ' + s.antibiotico : ' · Sem antibiótico') +
+    ' · ' + fmtDate(s.dataCirurgia||s.data);
+  fr.style.display = 'none';
+  fc.style.display = 'block';
+  renderAuditOpcoes(s.auditoria ? s.auditoria.classificacao : '');
+  var obsEl = document.getElementById('audit-obs');
+  if (obsEl) obsEl.value = (s.auditoria && s.auditoria.obs) ? s.auditoria.obs : '';
+}
+
+function renderAuditOpcoes(selCls) {
+  var html = '';
+  for (var i = 0; i < AUDIT_OPCOES.length; i++) {
+    var o = AUDIT_OPCOES[i];
+    var ativo = selCls === o.id ? ' ' + o.cls : '';
+    html += '<div class="audit-opt' + ativo + '" id="audit_' + o.id + '" onclick="selecionarAudit(\'' + o.id + '\')">' +
+      '<div>' +
+        '<span class="audit-opt-radio"></span>' +
+        '<span class="audit-opt-titulo">' + o.titulo + '</span>' +
+      '</div>' +
+      '<div class="audit-opt-desc">' + o.desc + '</div>' +
+    '</div>';
+  }
+  document.getElementById('audit-opcoes').innerHTML = html;
+}
+
+function selecionarAudit(id) {
+  // Remove seleção de todos
+  for (var i = 0; i < AUDIT_OPCOES.length; i++) {
+    var el = document.getElementById('audit_' + AUDIT_OPCOES[i].id);
+    if (el) el.className = 'audit-opt';
+  }
+  // Ativa o selecionado
+  var opt = null;
+  for (var j = 0; j < AUDIT_OPCOES.length; j++) if (AUDIT_OPCOES[j].id === id) { opt = AUDIT_OPCOES[j]; break; }
+  if (opt) {
+    var el2 = document.getElementById('audit_' + id);
+    if (el2) el2.className = 'audit-opt ' + opt.cls;
   }
 }
+
+function getAuditSel() {
+  for (var i = 0; i < AUDIT_OPCOES.length; i++) {
+    var el = document.getElementById('audit_' + AUDIT_OPCOES[i].id);
+    if (el && el.className.indexOf(AUDIT_OPCOES[i].cls) !== -1) return AUDIT_OPCOES[i].id;
+  }
+  return null;
+}
+
+function salvarAuditoria() {
+  var id = _auditSelId;
+  if (!id) { alert2('audit-alert','Selecione um atendimento.','er'); return; }
+  var classificacao = getAuditSel();
+  if (!classificacao) { alert2('audit-alert','Selecione uma das quatro classificações.','er'); return; }
+  var idx = -1;
+  for (var i = 0; i < sols.length; i++) if (String(sols[i].id) === String(id)) { idx = i; break; }
+  if (idx === -1) { alert2('audit-alert','Registro não encontrado.','er'); return; }
+  var obs = document.getElementById('audit-obs').value.trim();
+  sols[idx].auditoria = { classificacao: classificacao, obs: obs, auditadoEm: new Date().toISOString() };
+  _bloqueioReRender = true; // impede Firebase de desfazer o estado visual
+  save();
+
+  // Oculta TUDO — seletor, info, formulário
+  var elSel = document.getElementById('audit-sel');
+  if (elSel) elSel.parentNode.parentNode.style.display = 'none'; // oculta card do seletor
+  document.getElementById('audit-form-card').style.display = 'none';
+  document.getElementById('audit-info').style.display = 'none';
+
+  var opt = null;
+  for (var j = 0; j < AUDIT_OPCOES.length; j++) if (AUDIT_OPCOES[j].id === classificacao) { opt = AUDIT_OPCOES[j]; break; }
+
+  var bgMap  = { congruencia_positiva:'#e8f3e8', congruencia_negativa:'#fdeaea', incongruencia_positiva:'#f3f0ff', incongruencia_negativa:'#fef3d9' };
+  var clrMap = { congruencia_positiva:'var(--green)', congruencia_negativa:'var(--red)', incongruencia_positiva:'#7c3aed', incongruencia_negativa:'var(--amber)' };
+  var bdMap  = { congruencia_positiva:'#b8dbb8', congruencia_negativa:'#f0c0c0', incongruencia_positiva:'#c4b5fd', incongruencia_negativa:'#f5dda0' };
+  var iconMap= { congruencia_positiva:'✓', congruencia_negativa:'✓', incongruencia_positiva:'⚠', incongruencia_negativa:'⚠' };
+
+  var bg3  = bgMap[classificacao]  || 'var(--surface2)';
+  var clr3 = clrMap[classificacao] || 'var(--text)';
+  var bd3  = bdMap[classificacao]  || 'var(--border)';
+  var ic3  = iconMap[classificacao] || '?';
+  var s    = sols[idx];
+  var pacInfo = (s.iniciais ? '<strong>' + s.iniciais + '</strong> · ' : '') +
+    (s.atendimento||s.prontuario||'') + (s.procedimento ? ' · ' + s.procedimento : '') +
+    ' · ' + fmtDate(s.dataCirurgia||s.data);
+
+  var fr = document.getElementById('audit-resumo');
+  fr.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">' +
+      '<div>' +
+        '<div style="font-family:var(--font-d);font-size:13px;font-weight:500;color:var(--green);">✓ Auditoria salva com sucesso!</div>' +
+        '<div style="font-size:12px;color:var(--text3);margin-top:3px;">' + pacInfo + '</div>' +
+      '</div>' +
+      '<button class="btn" style="font-size:12px;padding:5px 14px;" onclick="reabrirAuditoria(\'' + id + '\')">✎ Editar</button>' +
+    '</div>' +
+    '<div style="background:'+bg3+';border:2px solid '+bd3+';border-radius:var(--r);padding:1.5rem 2rem;text-align:center;">' +
+      '<div style="font-size:48px;color:'+clr3+';font-weight:700;line-height:1;margin-bottom:8px;">'+ic3+'</div>' +
+      '<div style="font-size:17px;font-weight:600;color:'+clr3+';margin-bottom:6px;">'+(opt?opt.titulo:classificacao)+'</div>' +
+      '<div style="font-size:12px;color:var(--text2);max-width:420px;margin:0 auto;line-height:1.6;">'+(opt?opt.desc:'')+'</div>' +
+      (obs ? '<div style="font-size:12px;color:var(--text3);margin-top:12px;border-top:1px solid '+bd3+';padding-top:12px;font-style:italic;">Obs: '+obs+'</div>' : '') +
+    '</div>' +
+    '<div style="margin-top:12px;text-align:right;">' +
+      '<button class="btn pri" style="font-size:12px;" onclick="novaAuditoria()">+ Auditar outro registro</button>' +
+    '</div>';
+  fr.style.display = 'block';
+}
+
+function reabrirAuditoria(id) {
+  _bloqueioReRender = false;
+  var elCard = document.getElementById('audit-sel');
+  if (elCard) elCard.parentNode.parentNode.style.display = 'block';
+  document.getElementById('audit-resumo').style.display = 'none';
+  _auditSelId = id;
+  popAuditoria();
+  document.getElementById('audit-sel').value = id;
+  onAuditSelChange();
+}
+
+function novaAuditoria() {
+  _bloqueioReRender = false;
+  var elCard = document.getElementById('audit-sel');
+  if (elCard) elCard.parentNode.parentNode.style.display = 'block';
+  document.getElementById('audit-resumo').style.display = 'none';
+  document.getElementById('audit-form-card').style.display = 'none';
+  document.getElementById('audit-info').style.display = 'none';
+  _auditSelId = null;
+  popAuditoria();
+}
+
+/* =========================================================
+   INFECÇÃO DE SÍTIO CIRÚRGICO (ISC)
+   ========================================================= */
+function renderISC() {
+  var busca    = (document.getElementById('isc-busca')||{value:''}).value.toLowerCase();
+  var filtroEq = (document.getElementById('isc-filtro-eq')||{value:''}).value;
+  var filtroIsc= (document.getElementById('isc-filtro-isc')||{value:''}).value;
+  var fDe      = (document.getElementById('isc-de')||{value:''}).value;
+  var fAte     = (document.getElementById('isc-ate')||{value:''}).value;
+
+  // Popular select de equipes
+  var eqNms = [], seenE = {}, i, s;
+  for (i = 0; i < sols.length; i++) {
+    s = sols[i];
+    if (s.equipeNome && !seenE[s.equipeNome]) { eqNms.push(s.equipeNome); seenE[s.equipeNome] = 1; }
+  }
+  var selEq = document.getElementById('isc-filtro-eq');
+  var curEq = selEq ? selEq.value : '';
+  if (selEq) {
+    selEq.innerHTML = '<option value="">Todas as equipes</option>';
+    for (i = 0; i < eqNms.length; i++) selEq.innerHTML += '<option' + (eqNms[i]===curEq?' selected':'') + '>' + eqNms[i] + '</option>';
+  }
+
+  // Filtrar lista
+  var lst = [], d;
+  for (i = sols.length-1; i >= 0; i--) {
+    s = sols[i];
+    d = s.dataCirurgia || (s.data ? s.data.slice(0,10) : '');
+    var temIsc = s.isc && s.isc.confirmado === true;
+    var txtBusca = ((s.atendimento||s.prontuario||'') + ' ' + (s.iniciais||'') + ' ' + (s.procedimento||'') + ' ' + (s.solicitante||'') + ' ' + (s.equipeNome||'')).toLowerCase();
+    if (busca     && txtBusca.indexOf(busca) === -1) continue;
+    if (filtroEq  && s.equipeNome !== filtroEq) continue;
+    if (fDe       && d && d < fDe)  continue;
+    if (fAte      && d && d > fAte) continue;
+    if (filtroIsc === 'sim' && !temIsc) continue;
+    if (filtroIsc === 'nao' &&  temIsc) continue;
+    lst.push({ sol:s, idx:i });
+  }
+
+  // Métricas
+  var nTotal = sols.length;
+  var nComIsc = 0;
+  for (i = 0; i < sols.length; i++) if (sols[i].isc && sols[i].isc.confirmado === true) nComIsc++;
+  var taxa = nTotal ? ((nComIsc/nTotal)*100).toFixed(1) : '0.0';
+  var metricsEl = document.getElementById('isc-metrics');
+  if (metricsEl) {
+    metricsEl.innerHTML =
+      '<div class="metric" style="border-left:3px solid var(--text);">' +
+        '<div class="mlabel">Total de cirurgias</div><div class="mval">' + nTotal + '</div></div>' +
+      '<div class="metric" style="border-left:3px solid var(--red);">' +
+        '<div class="mlabel">Com infecção (ISC)</div><div class="mval r">' + nComIsc + '</div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">taxa: ' + taxa + '%</div></div>' +
+      '<div class="metric" style="border-left:3px solid var(--green);">' +
+        '<div class="mlabel">Sem infecção</div><div class="mval g">' + (nTotal-nComIsc) + '</div></div>';
+  }
+
+  // Tabela
+  var tb = document.getElementById('isc-tbody');
+  if (!lst.length) { tb.innerHTML = '<tr><td colspan="8" class="empty">Nenhuma cirurgia encontrada.</td></tr>'; return; }
+  var html = '';
+  for (i = 0; i < lst.length; i++) {
+    s = lst[i].sol;
+    var idx2 = lst[i].idx;
+    var temIsc2 = s.isc && s.isc.confirmado === true;
+    d = s.dataCirurgia || (s.data ? s.data.slice(0,10) : '');
+
+    var btnStyle = temIsc2
+      ? 'background:var(--red-bg);color:var(--red);border:2px solid #f0c0c0;font-weight:600;'
+      : 'background:var(--surface2);color:var(--text3);border:2px solid var(--border);';
+
+    html += '<tr style="' + (temIsc2 ? 'background:#fffafa;' : '') + '">' +
+      '<td style="font-family:var(--font-d);font-size:12px;padding:10px;">' + (s.atendimento||s.prontuario||'—') + '</td>' +
+      '<td style="font-size:12px;padding:10px;">' + (s.iniciais||'—') + '</td>' +
+      '<td style="font-size:12px;padding:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+(s.procedimento||'')+'">' + (s.procedimento||'—') + '</td>' +
+      '<td style="font-size:12px;padding:10px;">' + (s.equipeNome||'—') + '</td>' +
+      '<td style="font-size:12px;padding:10px;">' + (s.solicitante||'—') + '</td>' +
+      '<td style="font-family:var(--font-d);font-size:12px;padding:10px;">' + fmtDate(d) + '</td>' +
+      '<td style="font-size:11px;padding:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (s.antibiotico||'—') + '</td>' +
+      '<td style="padding:10px;text-align:center;">' +
+        '<button onclick="toggleISC(' + idx2 + ')" style="' + btnStyle + 'padding:5px 11px;border-radius:var(--r);cursor:pointer;font-size:12px;font-family:var(--font-d);white-space:nowrap;">' +
+          (temIsc2 ? '⚠ ISC confirmada' : 'Marcar ISC') +
+        '</button>' +
+      '</td>' +
+    '</tr>';
+
+    // Linha expandida com detalhes quando ISC confirmada
+    if (temIsc2) {
+      var isc = s.isc || {};
+      var jaSalvo = isc.salvoEm && (isc.tipo || isc.origem || isc.gravidade);
+
+      html += '<tr style="background:#fffafa;"><td colspan="8" style="padding:0;border-bottom:1px solid #f0c0c0;">' +
+        '<div class="isc-detalhe" id="isc-detalhe-' + idx2 + '">';
+
+      if (jaSalvo) {
+        // Modo resumo
+        var tipoLabels2     = { incisional_superficial:'Incisional superficial', incisional_profunda:'Incisional profunda', orgao_cavidade:'Órgão/cavidade' };
+        var origemLabels2   = { comunitaria:'Comunitária', hospitalar:'Hospitalar', extra_institucional:'Extra-Institucional', nao_especificado:'Não Especificado / Não Informado' };
+        var gravidadeLabels2= { sem_sepse:'Sem sepse', sepse:'Sepse', choque_septico:'Choque séptico', nao_especificado:'Não Especificado / Não Informado' };
+        var gravidadeCores2 = { sem_sepse:'var(--green)', sepse:'var(--amber)', choque_septico:'var(--red)', nao_especificado:'var(--text3)' };
+        var gravidadeBg2    = { sem_sepse:'#e8f3e8', sepse:'#fef3d9', choque_septico:'#fdeaea', nao_especificado:'var(--surface2)' };
+        var tipo2   = tipoLabels2[isc.tipo]      || '—';
+        var origem2 = origemLabels2[isc.origem]  || '—';
+        var grav2   = gravidadeLabels2[isc.gravidade] || '—';
+        var gravCor2= gravidadeCores2[isc.gravidade] || 'var(--text3)';
+        var gravBg2 = gravidadeBg2[isc.gravidade]    || 'var(--surface2)';
+        var gravBd2 = isc.gravidade==='choque_septico'?'#f0c0c0':isc.gravidade==='sepse'?'#f5dda0':'var(--border)';
+        var gravIc2 = isc.gravidade==='choque_septico'?'!!!':isc.gravidade==='sepse'?'!!':'✓';
+
+        html +=
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">' +
+            '<div style="font-family:var(--font-d);font-size:12px;font-weight:500;color:var(--green);">✓ Detalhes da ISC salvos</div>' +
+            '<div style="display:flex;gap:6px;">' +
+              '<button onclick="editarDetalhesISC(' + idx2 + ')" style="padding:5px 12px;font-size:12px;font-family:var(--font-b);border:1px solid var(--border);border-radius:var(--r);background:#fff;color:var(--text2);cursor:pointer;">✎ Editar</button>' +
+              '<button onclick="removerISC(' + idx2 + ')" style="padding:5px 12px;font-size:12px;font-family:var(--font-b);border:1px solid #f0c0c0;border-radius:var(--r);background:#fff;color:var(--red);cursor:pointer;">Remover ISC</button>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">' +
+            '<div style="background:var(--red-bg);border:2px solid #f0c0c0;border-radius:var(--r);padding:12px 14px;">' +
+              '<div style="font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Tipo de ISC</div>' +
+              '<div style="font-size:15px;font-weight:700;color:var(--red);">⚠</div>' +
+              '<div style="font-size:12px;font-weight:500;color:var(--red);margin-top:3px;">' + tipo2 + '</div>' +
+            '</div>' +
+            '<div style="background:var(--surface2);border:2px solid var(--border);border-radius:var(--r);padding:12px 14px;">' +
+              '<div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Origem</div>' +
+              '<div style="font-size:15px;font-weight:700;color:var(--text2);">→</div>' +
+              '<div style="font-size:12px;font-weight:500;color:var(--text);margin-top:3px;">' + origem2 + '</div>' +
+            '</div>' +
+            '<div style="background:' + gravBg2 + ';border:2px solid ' + gravBd2 + ';border-radius:var(--r);padding:12px 14px;">' +
+              '<div style="font-size:9px;color:' + gravCor2 + ';text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Gravidade</div>' +
+              '<div style="font-size:15px;font-weight:700;color:' + gravCor2 + ';">' + gravIc2 + '</div>' +
+              '<div style="font-size:12px;font-weight:500;color:' + gravCor2 + ';margin-top:3px;">' + grav2 + '</div>' +
+            '</div>' +
+          '</div>' +
+          (isc.obs ? '<div style="margin-top:8px;font-size:12px;color:var(--text2);border-top:1px solid #f0c0c0;padding-top:8px;font-style:italic;">Obs: ' + isc.obs + '</div>' : '');
+
+      } else {
+        // Modo formulário
+        html +=
+          '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;flex-wrap:wrap;">' +
+          '<div class="isc-grupo">' +
+            '<div class="isc-grupo-label">Infecção de sítio cirúrgico</div>' +
+            '<div class="isc-radios">' +
+              iscRadio(idx2,'tipo','incisional_superficial','Incisional superficial',isc.tipo) +
+              iscRadio(idx2,'tipo','incisional_profunda','Incisional profunda',isc.tipo) +
+              iscRadio(idx2,'tipo','orgao_cavidade','Órgão/cavidade',isc.tipo) +
+            '</div>' +
+          '</div>' +
+          '<div class="isc-grupo">' +
+            '<div class="isc-grupo-label">Origem da infecção</div>' +
+            '<div class="isc-radios">' +
+              iscRadio(idx2,'origem','comunitaria','Comunitária',isc.origem) +
+              iscRadio(idx2,'origem','hospitalar','Hospitalar',isc.origem) +
+              iscRadio(idx2,'origem','extra_institucional','Extra-Institucional',isc.origem) +
+              iscRadio(idx2,'origem','nao_especificado','Não Especificado / Não Informado',isc.origem) +
+            '</div>' +
+          '</div>' +
+          '<div class="isc-grupo">' +
+            '<div class="isc-grupo-label">Gravidade</div>' +
+            '<div class="isc-radios">' +
+              iscRadio(idx2,'gravidade','sem_sepse','Sem sepse',isc.gravidade) +
+              iscRadio(idx2,'gravidade','sepse','Sepse',isc.gravidade) +
+              iscRadio(idx2,'gravidade','choque_septico','Choque séptico',isc.gravidade) +
+              iscRadio(idx2,'gravidade','nao_especificado','Não Especificado / Não Informado',isc.gravidade) +
+            '</div>' +
+          '</div>' +
+          '</div>' +
+          '<div style="display:flex;align-items:flex-end;gap:10px;margin-top:10px;">' +
+            '<div style="flex:1;">' +
+              '<div class="isc-grupo-label" style="margin-bottom:4px;">Observações</div>' +
+              '<input type="text" id="isc-obs-' + idx2 + '" value="' + (isc.obs||'').replace(/"/g,'&quot;') + '" placeholder="Observações adicionais..." style="font-size:12px;padding:6px 10px;border:1px solid #f0c0c0;border-radius:var(--r);width:100%;background:#fff;">' +
+            '</div>' +
+            '<button onclick="salvarDetalhesISC(' + idx2 + ')" style="padding:6px 14px;font-size:12px;font-family:var(--font-b);border:none;border-radius:var(--r);background:var(--red);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;">Salvar detalhes</button>' +
+            '<button onclick="removerISC(' + idx2 + ')" style="padding:6px 14px;font-size:12px;font-family:var(--font-b);border:1px solid #f0c0c0;border-radius:var(--r);background:#fff;color:var(--red);cursor:pointer;white-space:nowrap;flex-shrink:0;">Remover ISC</button>' +
+          '</div>';
+      }
+
+      html += '</div></td></tr>';
+    }
+  }
+  tb.innerHTML = html;
+}
+
+function iscRadio(idx, campo, valor, label, atual) {
+  var sel = atual === valor ? ' sel-isc' : '';
+  return '<label class="isc-radio' + sel + '" onclick="selecionarISCRadio(' + idx + ',\'' + campo + '\',\'' + valor + '\')">' +
+    '<span class="isc-radio-dot"></span>' + label +
+  '</label>';
+}
+
+function selecionarISCRadio(idx, campo, valor) {
+  var s = sols[idx]; if (!s || !s.isc) return;
+  s.isc[campo] = valor;
+  // Atualiza visual sem re-renderizar tudo
+  renderISC();
+}
+
+function salvarDetalhesISC(idx) {
+  var s = sols[idx]; if (!s || !s.isc) return;
+  var obsEl = document.getElementById('isc-obs-' + idx);
+  if (obsEl) s.isc.obs = obsEl.value.trim();
+  s.isc.salvoEm = new Date().toISOString();
+  save();
+  renderISC();
+}
+
+function editarDetalhesISC(idx) {
+  // Limpa o salvoEm para voltar ao modo formulário
+  if (sols[idx] && sols[idx].isc) sols[idx].isc.salvoEm = null;
+  renderISC();
+  setTimeout(function() {
+    var el = document.getElementById('isc-detalhe-' + idx);
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'center' });
+  }, 80);
+}
+
+function removerISC(idx) {
+  if (!confirm('Remover o registro de ISC desta cirurgia?')) return;
+  sols[idx].isc = { confirmado: false, obs: '', registradoEm: new Date().toISOString() };
+  save();
+  renderISC();
+}
+
+function toggleISC(idx) {
+  var s = sols[idx]; if (!s) return;
+  var temIsc = s.isc && s.isc.confirmado === true;
+  if (temIsc) return; // Já confirmada — usa botão "Remover ISC" dentro do painel
+  // Confirmar ISC
+  sols[idx].isc = { confirmado: true, obs: '', tipo: '', origem: '', gravidade: '', registradoEm: new Date().toISOString() };
+  save();
+  renderISC();
+}
+
+/* =========================================================
+   TAXA DE ISC
+   ========================================================= */
+// totaisCirurgias: [ { id, mes:'2026-04', equipe:'SAD', total:142, obs:'', criadoEm:'' } ]
+var totaisCirurgias = [];
+
+function salvarTaxaISC() {
+  var mes    = document.getElementById('taxa-mes').value;
+  var equipe = document.getElementById('taxa-equipe').value;
+  var total  = parseInt(document.getElementById('taxa-total').value, 10);
+  var obs    = document.getElementById('taxa-obs').value.trim();
+  if (!mes)    { alert2('taxaisc-alert','Selecione o mês/ano.','er'); return; }
+  if (!equipe) { alert2('taxaisc-alert','Selecione a equipe.','er'); return; }
+  if (!total || total < 0) { alert2('taxaisc-alert','Informe um total válido.','er'); return; }
+
+  // Atualiza se já existir para o mesmo mês+equipe
+  var found = false;
+  for (var i = 0; i < totaisCirurgias.length; i++) {
+    if (totaisCirurgias[i].mes === mes && totaisCirurgias[i].equipe === equipe) {
+      totaisCirurgias[i].total = total;
+      totaisCirurgias[i].obs   = obs;
+      totaisCirurgias[i].atualizadoEm = new Date().toISOString();
+      found = true; break;
+    }
+  }
+  if (!found) {
+    totaisCirurgias.push({ id: 'tc'+Date.now(), mes: mes, equipe: equipe, total: total, obs: obs, criadoEm: new Date().toISOString() });
+  }
+
+  // Salva no Firebase junto com os outros dados
+  saveTotais();
+  alert2('taxaisc-alert', 'Registro salvo!', 'ok');
+  document.getElementById('taxa-mes').value    = '';
+  document.getElementById('taxa-equipe').value = '';
+  document.getElementById('taxa-total').value  = '';
+  document.getElementById('taxa-obs').value    = '';
+  renderTaxaISC();
+}
+
+function saveTotais() {
+  // Salva totaisCirurgias no Firebase como parte do nó ccih
+  db.ref(DB_REF + '/totaisCirurgias').set(totaisCirurgias).catch(function(){});
+  try { localStorage.setItem('ccih_totais', JSON.stringify(totaisCirurgias)); } catch(e) {}
+}
+
+function excluirTotalISC(id) {
+  if (!confirm('Excluir este registro de total de cirurgias?')) return;
+  totaisCirurgias = totaisCirurgias.filter(function(t){ return t.id !== id; });
+  saveTotais();
+  renderTaxaISC();
+}
+
+function renderTaxaISC() {
+  var filtroEq = (document.getElementById('taxa-filtro-eq')||{value:''}).value;
+
+  // ISC por mês e equipe (dos registros de solicitações)
+  function iscPorMesEquipe(mes, equipe) {
+    var count = 0;
+    for (var i = 0; i < sols.length; i++) {
+      var s = sols[i];
+      if (!s.isc || !s.isc.confirmado) continue;
+      var d = s.dataCirurgia || (s.data ? s.data.slice(0,10) : '');
+      if (!d) continue;
+      var smesAno = d.slice(0, 7); // 'YYYY-MM'
+      if (smesAno !== mes) continue;
+      if (equipe === 'GERAL') { count++; continue; }
+      var eq = (s.equipeNome || '').toUpperCase();
+      if (eq.indexOf(equipe) !== -1) count++;
+    }
+    return count;
+  }
+
+  var lista = totaisCirurgias.filter(function(t){ return !filtroEq || t.equipe === filtroEq; });
+  lista.sort(function(a,b){ return b.mes.localeCompare(a.mes) || a.equipe.localeCompare(b.equipe); });
+
+  // Métricas gerais
+  var totalGeral = 0, iscGeral = 0;
+  for (var i = 0; i < totaisCirurgias.length; i++) {
+    totalGeral += totaisCirurgias[i].total;
+    iscGeral   += iscPorMesEquipe(totaisCirurgias[i].mes, totaisCirurgias[i].equipe);
+  }
+  var taxaGeral = totalGeral ? ((iscGeral/totalGeral)*100).toFixed(2) : '—';
+  var taxaAlerta = statusTaxa(taxaGeral, 'GERAL') === 'alta';
+
+  var metEl = document.getElementById('taxa-metrics');
+  if (metEl) {
+    metEl.innerHTML =
+      '<div class="metric" style="border-left:3px solid var(--text);">' +
+        '<div class="mlabel">Total de cirurgias registradas</div>' +
+        '<div class="mval">' + totalGeral.toLocaleString('pt-BR') + '</div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">' + totaisCirurgias.length + ' período(s) cadastrado(s)</div>' +
+      '</div>' +
+      '<div class="metric" style="border-left:3px solid var(--red);">' +
+        '<div class="mlabel">Total de ISC registradas</div>' +
+        '<div class="mval r">' + iscGeral + '</div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">em todos os períodos</div>' +
+      '</div>' +
+      '<div class="metric" style="border-left:3px solid ' + (taxaAlerta?'var(--red)':'var(--green)') + ';' + (taxaAlerta?'background:var(--red-bg);':'') + '">' +
+        '<div class="mlabel">Taxa geral de ISC</div>' +
+        '<div class="mval" style="color:' + (taxaAlerta?'var(--red)':'var(--green)') + ';">' + (taxaGeral !== '—' ? taxaGeral + '%' : '—') + '</div>' +
+        '<div style="font-size:10px;color:' + (taxaAlerta?'var(--red)':'var(--text3)') + ';font-weight:' + (taxaAlerta?'500':'400') + ';margin-top:2px;">meta: ≤' + META_ISC_DEFAULT + '% (varia por equipe)</div>' +
+      '</div>';
+  }
+
+  // Tabela
+  var tb = document.getElementById('taxa-tbody');
+  if (!lista.length) {
+    tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhum registro encontrado. Cadastre os totais de cirurgias.</td></tr>';
+    return;
+  }
+
+  var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var html = '';
+  for (var j = 0; j < lista.length; j++) {
+    var t = lista[j];
+    var nISC = iscPorMesEquipe(t.mes, t.equipe);
+    var taxa = t.total ? ((nISC/t.total)*100).toFixed(2) : '—';
+    var taxaNum = parseFloat(taxa);
+    var st = statusTaxa(taxa, t.equipe);
+    var meta = metaEquipe(t.equipe);
+    var taxaCor = st==='alta'?'var(--red)':st==='atencao'?'var(--amber)':st==='ok'&&nISC===0?'var(--green)':'var(--text3)';
+    var partes  = t.mes.split('-');
+    var mesNome = (partes[1] ? meses[parseInt(partes[1],10)-1] : '') + '/' + (partes[0]||'');
+
+    html += '<tr>' +
+      '<td style="padding:9px 10px;font-family:var(--font-d);font-size:12px;">' + mesNome + '</td>' +
+      '<td style="padding:9px 10px;">' +
+        '<span style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-size:11px;font-family:var(--font-d);padding:2px 8px;">' + t.equipe + '</span>' +
+      '</td>' +
+      '<td style="padding:9px 10px;text-align:right;font-family:var(--font-d);font-size:13px;font-weight:500;">' + t.total.toLocaleString('pt-BR') + '</td>' +
+      '<td style="padding:9px 10px;text-align:right;font-family:var(--font-d);font-size:13px;color:' + (nISC>0?'var(--red)':'var(--green)') + ';font-weight:' + (nISC>0?'600':'400') + ';">' + nISC + '</td>' +
+      '<td style="padding:9px 10px;text-align:right;font-family:var(--font-d);font-size:13px;font-weight:600;color:' + taxaCor + ';">' + (taxa !== '—' ? taxa + '%' : '—') + '</td>' +
+      '<td style="padding:9px 10px;text-align:center;">' + badgeTaxaISC(taxa, t.equipe) + '</td>' +
+      '<td style="padding:9px 10px;font-size:10px;color:var(--text3);">meta: &lt;' + meta + '%</td>' +
+      '<td style="padding:9px 10px;">' +
+        '<button onclick="excluirTotalISC(\'' + t.id + '\')" style="border:none;background:none;cursor:pointer;color:var(--text3);font-size:11px;font-family:var(--font-d);">excluir</button>' +
+      '</td>' +
+    '</tr>';
+
+    // Linha de observação se houver
+    if (t.obs) {
+      html += '<tr><td colspan="7" style="padding:3px 10px 8px;font-size:11px;color:var(--text3);font-style:italic;">Obs: ' + t.obs + '</td></tr>';
+    }
+  }
+  tb.innerHTML = html;
+}
+
+/* =========================================================
+   METAS DE TAXA DE ISC POR EQUIPE (2026)
+   SAD < 7,2% | SPL < 2% | demais ≤ 1%
+   Status: ok (0 ISC) | atencao (dentro do limite) | alta (acima do limite)
+   ========================================================= */
+var META_ISC = {
+  SAD: 7.2,
+  SPL: 2.0
+};
+var META_ISC_DEFAULT = 1.0;
+
+function metaEquipe(equipe) {
+  if (!equipe || equipe === 'GERAL') return META_ISC_DEFAULT;
+  var eq = equipe.toUpperCase().trim();
+  if (META_ISC[eq] !== undefined) return META_ISC[eq];
+  return META_ISC_DEFAULT;
+}
+
+// Retorna 'ok' | 'atencao' | 'alta'
+function statusTaxa(taxa, equipe) {
+  var t = parseFloat(taxa);
+  if (isNaN(t)) return 'sem_dados';
+  if (t === 0)  return 'ok';
+  var meta = metaEquipe(equipe);
+  if (t < meta) return 'atencao';
+  return 'alta';
+}
+
+function badgeTaxaISC(taxa, equipe) {
+  var st = statusTaxa(taxa, equipe);
+  var meta = metaEquipe(equipe);
+  if (st === 'ok')       return '<span style="background:var(--green-bg);color:var(--green);border:1px solid #b8dbb8;border-radius:4px;font-size:11px;font-family:var(--font-d);padding:2px 8px;font-weight:500;">✓ Ok</span>';
+  if (st === 'atencao')  return '<span style="background:var(--amber-bg);color:var(--amber);border:1px solid #f5dda0;border-radius:4px;font-size:11px;font-family:var(--font-d);padding:2px 8px;font-weight:500;">Atenção</span>';
+  if (st === 'alta')     return '<span style="background:var(--red-bg);color:var(--red);border:1px solid #f0c0c0;border-radius:4px;font-size:11px;font-family:var(--font-d);padding:2px 8px;font-weight:500;">⚠ Alta</span>';
+  return '<span style="background:var(--surface2);color:var(--text3);border-radius:4px;font-size:11px;padding:2px 8px;">—</span>';
+}
+
 function badge(s){return'<span class="badge '+s+'">'+s.charAt(0).toUpperCase()+s.slice(1)+'</span>';}
 function ini(n){if(!n)return'?';var p=n.split(' '),r='',i;for(i=0;i<Math.min(2,p.length);i++)if(p[i])r+=p[i][0].toUpperCase();return r||'?';}
 function alert2(elId,msg,tipo){var e=document.getElementById(elId);if(!e)return;e.className='alert '+tipo+' on';e.textContent=msg;setTimeout(function(){e.classList.remove('on');},2800);}
@@ -1808,7 +2805,7 @@ function renderReg() {
     lst.push({ sol:s, idx:i });
   }
   var tb = document.getElementById('all-tbody');
-  if (!lst.length) { tb.innerHTML = '<tr><td colspan="10" class="empty">Nenhum registro encontrado.</td></tr>'; return; }
+  if (!lst.length) { tb.innerHTML = '<tr><td colspan="11" class="empty">Nenhum registro encontrado.</td></tr>'; return; }
   html = '';
   for (i = 0; i < lst.length; i++) {
     s = lst[i].sol;
@@ -1823,6 +2820,7 @@ function renderReg() {
       '<td style="font-size:12px;font-family:var(--font-d);">' + fmtDate(d) + '</td>' +
       '<td style="font-family:var(--font-d);font-size:12px;">' + (s.duracaoCirurgia||'—') + '</td>' +
       '<td>' + badgeComp(s) + '</td>' +
+      '<td>' + badgeAudit(s) + '</td>' +
       '<td style="white-space:nowrap;">' +
         '<button onclick="verDet(' + lst[i].idx + ')" style="border:none;background:none;cursor:pointer;color:var(--text2);font-size:12px;font-family:var(--font-d);margin-right:4px;">ver →</button>' +
         '<button onclick="editarSol(' + lst[i].idx + ')" style="border:1px solid var(--border);background:none;cursor:pointer;color:var(--text2);font-size:11px;font-family:var(--font-d);padding:2px 7px;border-radius:4px;margin-right:3px;">editar</button>' +
@@ -2019,7 +3017,12 @@ function verDet(idx) {
   }
   // Medidas de prevenção
   if (s.prevencao) {
-    var nomes = {'normotermia':'Normotermia','glicemia_pre':'Glicemia pré-op','glicemia_pos':'Glicemia pós-op','preparo_pele':'Preparo da pele','antissepsia':'Antissepsia das mãos','enxaguante':'Enxaguante bucal'};
+    var nomes = {
+      normotermia:'Normotermia', glicemia_pre:'Glicemia pré-op', glicemia_pos:'Glicemia pós-op',
+      banho_pre:'Banho pré-op', tricotomia:'Tricotomia', preparo_pele:'Preparo da pele',
+      degermacao:'Degermação das mãos', controle_pessoal:'Controle de pessoal', desinfeccao_sala:'Desinfecção de sala',
+      sem_adornos:'Sem adornos', antissepsia_bucal:'Antissepsia bucal', preparo_colorretal:'Preparo ATM colorretal'
+    };
     var prevHtml = '';
     for (var campo in nomes) {
       var vp = s.prevencao[campo];
@@ -2030,6 +3033,19 @@ function verDet(idx) {
       }
     }
     if (prevHtml) body += '<div class="drow"><div class="dkey" style="padding-top:4px;">Medidas de prevenção</div><div class="dval">' + prevHtml + '</div></div>';
+  }
+  // Auditoria
+  if (s.auditoria && s.auditoria.classificacao) {
+    var labelsA = {
+      congruencia_positiva:'Congruência positiva', congruencia_negativa:'Congruência negativa',
+      incongruencia_positiva:'Incongruência positiva', incongruencia_negativa:'Incongruência negativa'
+    };
+    var coresA = {
+      congruencia_positiva:'color:var(--green)', congruencia_negativa:'color:var(--red)',
+      incongruencia_positiva:'color:#7c3aed', incongruencia_negativa:'color:var(--amber)'
+    };
+    var clA = s.auditoria.classificacao;
+    body += '<div class="drow"><div class="dkey">Auditoria</div><div class="dval" style="' + (coresA[clA]||'') + ';font-weight:500;">' + (labelsA[clA]||clA) + (s.auditoria.obs ? '<div style="font-size:11px;color:var(--text3);font-weight:400;margin-top:3px;">' + s.auditoria.obs + '</div>' : '') + '</div></div>';
   }
   document.getElementById('mbody').innerHTML = body;
   // Botões de ação no modal
@@ -2136,6 +3152,8 @@ function atualizarSol() {
   var criadoEm = sols[_editIdx].criadoEm;
   sols[_editIdx] = {
     id:idOrig, criadoEm:criadoEm, editadoEm:new Date().toISOString(),
+    auditoria: sols[_editIdx] ? sols[_editIdx].auditoria : null,
+    prevencao:  sols[_editIdx] ? sols[_editIdx].prevencao  : null,
     iniciais:    g('f-iniciais'),
     atendimento: g('f-pron'), nascimento:g('f-nasc'), idade:g('f-idade'),
     genero:g('f-genero'), peso:g('f-peso'), procedimento:g('f-proc'),
@@ -2302,8 +3320,9 @@ function renderCharts() {
   cT=new Chart(document.getElementById('ch-t'),{type:'line',data:{labels:days,datasets:[{data:days.map(function(d2){return dC[d2];}),borderColor:'#1a1916',backgroundColor:'rgba(26,25,22,0.07)',fill:true,tension:0.35,pointRadius:4,pointBackgroundColor:'#1a1916'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11},color:'#9e9c93'}},y:{ticks:{stepSize:1,color:'#9e9c93'}}}}});
 
   // ── Gráficos de Medidas de Prevenção ──────────────────
-  var prevNomes = ['Normotermia','Glicemia pré-op','Glicemia pós-op','Preparo da pele','Antissepsia das mãos','Enxaguante bucal'];
-  var prevIds   = ['normotermia','glicemia_pre','glicemia_pos','preparo_pele','antissepsia','enxaguante'];
+  var prevNomes = ['Normotermia','Glicemia pré-op','Glicemia pós-op','Banho pré-op','Tricotomia','Preparo da pele','Degermação das mãos','Controle de pessoal','Desinfecção de sala','Sem adornos','Antissepsia bucal'];
+  var prevIds   = ['normotermia','glicemia_pre','glicemia_pos','banho_pre','tricotomia','preparo_pele','degermacao','controle_pessoal','desinfeccao_sala','sem_adornos','antissepsia_bucal'];
+  // Preparo ATM colorretal é exibido separado (só SAD)
   var prevConf=[], prevNConf=[], prevNAv=[], prevNPr=[];
   var solsComPrev = sols.filter(function(s){ return s.prevencao; });
   var nComPrev = solsComPrev.length;
@@ -2350,6 +3369,304 @@ function renderCharts() {
         datasets:[{ data:[nCompleto, nParcial, nSemPrev], backgroundColor:['#2d6a2d','#ba7500','#d0cfc8'], borderWidth:0 }]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:8,color:'#6b6960'}}}}
+    });
+  }
+
+  // ── Gráficos de Auditoria ─────────────────────────────
+  var nCPos=0, nCNeg=0, nIPos=0, nINeg=0, nSemAudit=0;
+  var gastoReais=0; // valor total dos antibióticos com incongruência positiva
+  var auditPorEq = {};
+  for (var ai=0; ai<sols.length; ai++) {
+    var sa = sols[ai];
+    var eqA = (sa.equipeNome && sa.equipeNome.trim()) ? sa.equipeNome.trim() : 'Sem equipe';
+    if (!auditPorEq[eqA]) auditPorEq[eqA] = {cpos:0,cneg:0,ipos:0,ineg:0};
+    if (!sa.auditoria || !sa.auditoria.classificacao) { nSemAudit++; continue; }
+    var cl2 = sa.auditoria.classificacao;
+    if      (cl2==='congruencia_positiva')   { nCPos++; auditPorEq[eqA].cpos++; }
+    else if (cl2==='congruencia_negativa')   { nCNeg++; auditPorEq[eqA].cneg++; }
+    else if (cl2==='incongruencia_positiva') {
+      nIPos++; auditPorEq[eqA].ipos++;
+      // Soma o custo do antibiótico desnecessário
+      if (sa.antibioticoValor) gastoReais += parseFloat(sa.antibioticoValor) || 0;
+    }
+    else if (cl2==='incongruencia_negativa') { nINeg++; auditPorEq[eqA].ineg++; }
+  }
+
+  // Métricas de auditoria
+  var auditMetEl = document.getElementById('audit-metrics');
+  if (auditMetEl) {
+    auditMetEl.style.gridTemplateColumns = 'repeat(4,1fr)';
+    auditMetEl.innerHTML =
+      '<div class="metric" style="border-left:3px solid var(--green);">' +
+        '<div class="mlabel">Congruência positiva</div>' +
+        '<div class="mval g">' + nCPos + '</div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">Uso correto</div></div>' +
+      '<div class="metric" style="border-left:3px solid var(--red);">' +
+        '<div class="mlabel">Congruência negativa</div>' +
+        '<div class="mval r">' + nCNeg + '</div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">Não uso correto</div></div>' +
+      '<div class="metric" style="border-left:3px solid #7c3aed;' + (nIPos>0?'background:#f3f0ff;':'') + '">' +
+        '<div class="mlabel">Incongruência positiva</div>' +
+        '<div class="mval" style="color:#7c3aed;">' + nIPos + '</div>' +
+        '<div style="font-size:10px;color:var(--red);font-weight:500;margin-top:2px;">⚠ Gasto desnecessário</div>' +
+        (gastoReais>0 ? '<div style="font-size:11px;color:#7c3aed;font-weight:600;margin-top:3px;">' + fmtBRL(gastoReais) + '</div>' : '') +
+        '</div>' +
+      '<div class="metric" style="border-left:3px solid var(--amber);">' +
+        '<div class="mlabel">Incongruência negativa</div>' +
+        '<div class="mval a">' + nINeg + '</div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">Omissão de profilaxia</div></div>';
+  }
+
+  // Alerta de gasto desnecessário em reais
+  var gastoEl = document.getElementById('audit-gasto-alert');
+  if (gastoEl) {
+    if (nIPos > 0) {
+      gastoEl.style.display = 'block';
+      gastoEl.innerHTML = '⚠ ' + nIPos + ' caso' + (nIPos>1?'s':'') + ' de gasto desnecessário' +
+        (gastoReais>0 ? ' · Total: <strong>' + fmtBRL(gastoReais) + '</strong>' : '');
+    } else {
+      gastoEl.style.display = 'none';
+    }
+  }
+
+  // Rosca auditoria
+  if(cAuditRosca)cAuditRosca.destroy();
+  if(document.getElementById('ch-audit-rosca')) {
+    cAuditRosca = new Chart(document.getElementById('ch-audit-rosca'),{
+      type:'doughnut',
+      data:{ labels:['Congruência positiva','Congruência negativa','Incongruência positiva ⚠','Incongruência negativa','Sem auditoria'],
+        datasets:[{ data:[nCPos,nCNeg,nIPos,nINeg,nSemAudit], backgroundColor:['#2d6a2d','#8b1a1a','#7c3aed','#ba7500','#d0cfc8'], borderWidth:0 }]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:7,color:'#6b6960'}}}}
+    });
+  }
+
+  // Barras por equipe
+  var eqKeysA = Object.keys(auditPorEq).sort(function(a,b){
+    var ta=(auditPorEq[a].cpos+auditPorEq[a].cneg+auditPorEq[a].ipos+auditPorEq[a].ineg);
+    var tb2=(auditPorEq[b].cpos+auditPorEq[b].cneg+auditPorEq[b].ipos+auditPorEq[b].ineg);
+    return tb2-ta;
+  });
+  if(cAuditBar)cAuditBar.destroy();
+  if(document.getElementById('ch-audit-bar') && eqKeysA.length) {
+    cAuditBar = new Chart(document.getElementById('ch-audit-bar'),{
+      type:'bar',
+      data:{ labels: eqKeysA,
+        datasets:[
+          {label:'Cong. positiva',  data:eqKeysA.map(function(e){return auditPorEq[e].cpos;}), backgroundColor:'#2d6a2d',borderWidth:0,borderRadius:2},
+          {label:'Cong. negativa',  data:eqKeysA.map(function(e){return auditPorEq[e].cneg;}), backgroundColor:'#8b1a1a',borderWidth:0,borderRadius:2},
+          {label:'Incong. positiva ⚠',data:eqKeysA.map(function(e){return auditPorEq[e].ipos;}), backgroundColor:'#7c3aed',borderWidth:0,borderRadius:2},
+          {label:'Incong. negativa',data:eqKeysA.map(function(e){return auditPorEq[e].ineg;}), backgroundColor:'#ba7500',borderWidth:0,borderRadius:2},
+        ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:7,color:'#6b6960'}}},
+        scales:{x:{stacked:true,ticks:{font:{size:9},color:'#9e9c93'}},y:{stacked:true,ticks:{stepSize:1,color:'#9e9c93'}}}}
+    });
+  }
+
+  // ── Gráficos de ISC ───────────────────────────────────
+  var iscList = sols.filter(function(s){ return s.isc && s.isc.confirmado === true; });
+  var nISC = iscList.length;
+  var taxaISC = sols.length ? ((nISC/sols.length)*100).toFixed(1) : '0.0';
+
+  var iscGrafMet = document.getElementById('isc-graf-metrics');
+  if (iscGrafMet) {
+    iscGrafMet.innerHTML =
+      '<div class="metric" style="border-left:3px solid var(--text);">' +
+        '<div class="mlabel">Total de cirurgias</div><div class="mval">' + sols.length + '</div></div>' +
+      '<div class="metric" style="border-left:3px solid var(--red);">' +
+        '<div class="mlabel">Com ISC confirmada</div><div class="mval r">' + nISC + '</div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">taxa: ' + taxaISC + '%</div></div>' +
+      '<div class="metric" style="border-left:3px solid var(--amber);">' +
+        '<div class="mlabel">Taxa de ISC</div>' +
+        '<div class="mval" style="color:' + (parseFloat(taxaISC)>5?'var(--red)':'var(--amber)') + ';">' + taxaISC + '%</div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">' + (parseFloat(taxaISC)>5?'⚠ acima de 5%':'dentro do esperado') + '</div></div>';
+  }
+
+  var iscAlert = document.getElementById('isc-taxa-alert');
+  if (iscAlert) {
+    if (nISC > 0) { iscAlert.style.display='block'; iscAlert.innerHTML='⚠ ' + nISC + ' caso'+(nISC>1?'s':'')+' de ISC · Taxa: '+taxaISC+'%'; }
+    else iscAlert.style.display = 'none';
+  }
+
+  var iscEqMap = {}, iscMedMap = {};
+  for (var ii = 0; ii < iscList.length; ii++) {
+    var si = iscList[ii];
+    var eqi  = (si.equipeNome && si.equipeNome.trim()) ? si.equipeNome.trim() : 'Sem equipe';
+    var medi = si.solicitante || 'Sem médico';
+    iscEqMap[eqi]   = (iscEqMap[eqi]   || 0) + 1;
+    iscMedMap[medi] = (iscMedMap[medi] || 0) + 1;
+  }
+
+  var eqKeysISC = Object.keys(iscEqMap).sort(function(a,b){ return iscEqMap[b]-iscEqMap[a]; });
+  if(cIscEq)cIscEq.destroy();
+  if(document.getElementById('ch-isc-eq') && eqKeysISC.length) {
+    cIscEq = new Chart(document.getElementById('ch-isc-eq'),{
+      type:'bar',
+      data:{ labels:eqKeysISC, datasets:[{label:'ISC',data:eqKeysISC.map(function(e){return iscEqMap[e];}),backgroundColor:'#8b1a1a',borderWidth:0,borderRadius:3}]},
+      options:{ responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){
+          var tot=sols.filter(function(s){return (s.equipeNome||'Sem equipe')===c.label;}).length;
+          return ' ISC: '+c.raw+(tot?' ('+((c.raw/tot)*100).toFixed(1)+'% da equipe)':'');
+        }}}},
+        scales:{x:{ticks:{font:{size:10},color:'#9e9c93'}},y:{ticks:{stepSize:1,color:'#9e9c93'},beginAtZero:true}} }
+    });
+  }
+
+  var medKeysISC = Object.keys(iscMedMap).sort(function(a,b){return iscMedMap[b]-iscMedMap[a];}).slice(0,8);
+  if(cIscMed)cIscMed.destroy();
+  if(document.getElementById('ch-isc-med') && medKeysISC.length) {
+    cIscMed = new Chart(document.getElementById('ch-isc-med'),{
+      type:'bar',
+      data:{ labels:medKeysISC.map(function(m){return m.length>18?m.split(' ').slice(0,2).join(' '):m;}),
+        datasets:[{label:'ISC',data:medKeysISC.map(function(m){return iscMedMap[m];}),backgroundColor:'#7c3aed',borderWidth:0,borderRadius:3}]},
+      options:{ indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{x:{ticks:{stepSize:1,color:'#9e9c93'},beginAtZero:true},y:{ticks:{font:{size:10},color:'#9e9c93'}}} }
+    });
+  }
+
+  // ── Gráficos de Taxa de ISC ───────────────────────────
+  function iscNoMesEquipe(mes, equipe) {
+    var n = 0;
+    for (var xi = 0; xi < sols.length; xi++) {
+      var sx = sols[xi];
+      if (!sx.isc || !sx.isc.confirmado) continue;
+      var dx = sx.dataCirurgia || (sx.data ? sx.data.slice(0,7) : '');
+      if (dx.slice(0,7) !== mes) continue;
+      if (equipe === 'GERAL') { n++; continue; }
+      if ((sx.equipeNome||'').toUpperCase().indexOf(equipe) !== -1) n++;
+    }
+    return n;
+  }
+
+  // Agrupa por mês (apenas registros GERAL ou soma de equipes)
+  var mesesMap = {}; // { 'YYYY-MM': { total, isc } }
+  for (var ti = 0; ti < totaisCirurgias.length; ti++) {
+    var tr2 = totaisCirurgias[ti];
+    var m2  = tr2.mes;
+    if (!mesesMap[m2]) mesesMap[m2] = { total:0, isc:0 };
+    mesesMap[m2].total += tr2.total;
+    mesesMap[m2].isc   += iscNoMesEquipe(m2, tr2.equipe);
+  }
+  var mesesKeys = Object.keys(mesesMap).sort();
+  var mesesNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  function fmtMes(ym) { var p=ym.split('-'); return (mesesNomes[parseInt(p[1],10)-1]||p[1])+'/'+(p[0]||''); }
+
+  // Métricas Taxa ISC
+  var totalGrafCir = 0, totalGrafISC = 0;
+  for (var mi2 = 0; mi2 < mesesKeys.length; mi2++) { totalGrafCir += mesesMap[mesesKeys[mi2]].total; totalGrafISC += mesesMap[mesesKeys[mi2]].isc; }
+  var taxaGeralGraf = totalGrafCir ? ((totalGrafISC/totalGrafCir)*100).toFixed(2) : '—';
+  var melhorMes = '—', piorMes = '—', melhorTaxa = Infinity, piorTaxa = -1;
+  for (var mi3 = 0; mi3 < mesesKeys.length; mi3++) {
+    var mk = mesesKeys[mi3], mv = mesesMap[mk];
+    if (!mv.total) continue;
+    var tx = mv.isc/mv.total*100;
+    if (tx < melhorTaxa) { melhorTaxa = tx; melhorMes = fmtMes(mk); }
+    if (tx > piorTaxa)   { piorTaxa = tx;   piorMes   = fmtMes(mk); }
+  }
+
+  var taxaGrafEl = document.getElementById('taxa-graf-metrics');
+  if (taxaGrafEl) {
+    var txNum = parseFloat(taxaGeralGraf);
+    var txAlerta = !isNaN(txNum) && txNum > META_ISC_DEFAULT;
+    taxaGrafEl.innerHTML =
+      '<div class="metric" style="border-left:3px solid var(--text);">' +
+        '<div class="mlabel">Total de cirurgias</div><div class="mval">' + totalGrafCir.toLocaleString('pt-BR') + '</div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">' + mesesKeys.length + ' mês(es) registrado(s)</div></div>' +
+      '<div class="metric" style="border-left:3px solid var(--red);">' +
+        '<div class="mlabel">Total de ISC</div><div class="mval r">' + totalGrafISC + '</div></div>' +
+      '<div class="metric" style="border-left:3px solid ' + (txAlerta?'var(--red)':'var(--green)') + ';' + (txAlerta?'background:var(--red-bg);':'') + '">' +
+        '<div class="mlabel">Taxa geral ISC</div>' +
+        '<div class="mval" style="color:' + (txAlerta?'var(--red)':'var(--green)') + ';">' + (taxaGeralGraf!=='—'?taxaGeralGraf+'%':'—') + '</div>' +
+        '<div style="font-size:10px;color:' + (txAlerta?'var(--red)':'var(--text3)') + ';font-weight:' + (txAlerta?'500':'400') + ';margin-top:2px;">meta geral: ≤' + META_ISC_DEFAULT + '%</div></div>' +
+      '<div class="metric" style="border-left:3px solid var(--amber);">' +
+        '<div class="mlabel">Pior mês</div>' +
+        '<div style="font-family:var(--font-d);font-size:18px;font-weight:600;color:var(--amber);">' + piorMes + '</div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">' + (piorTaxa>=0&&piorMes!=='—'?piorTaxa.toFixed(2)+'% de taxa':'—') + '</div></div>';
+  }
+
+  var taxaGrafAlertEl = document.getElementById('taxa-graf-alert');
+  if (taxaGrafAlertEl) {
+    if (totalGrafISC > 0 && parseFloat(taxaGeralGraf) > META_ISC_DEFAULT) {
+      taxaGrafAlertEl.style.display = 'block';
+      taxaGrafAlertEl.innerHTML = '⚠ Taxa geral: ' + taxaGeralGraf + '% — acima da meta de ' + META_ISC_DEFAULT + '%';
+    } else { taxaGrafAlertEl.style.display = 'none'; }
+  }
+
+  // Gráfico linha — taxa ISC por mês com linha de meta geral
+  if(cTaxaMes)cTaxaMes.destroy();
+  if(document.getElementById('ch-taxa-mes') && mesesKeys.length) {
+    var taxasPorMes = mesesKeys.map(function(m){ var mv2=mesesMap[m]; return mv2.total?parseFloat((mv2.isc/mv2.total*100).toFixed(2)):0; });
+    cTaxaMes = new Chart(document.getElementById('ch-taxa-mes'),{
+      type:'line',
+      data:{ labels:mesesKeys.map(fmtMes),
+        datasets:[
+          { label:'Taxa ISC (%)', data:taxasPorMes, borderColor:'#8b1a1a', backgroundColor:'rgba(139,26,26,0.08)', fill:true, tension:0.35, pointRadius:5, pointBackgroundColor:taxasPorMes.map(function(v){return v>META_ISC_DEFAULT?'#8b1a1a':'#2d6a2d';}), borderWidth:2 },
+          { label:'Meta geral (' + META_ISC_DEFAULT + '%)', data:mesesKeys.map(function(){ return META_ISC_DEFAULT; }), borderColor:'#ba7500', borderDash:[5,5], borderWidth:1.5, pointRadius:0, fill:false },
+          { label:'Meta SAD (7,2%)', data:mesesKeys.map(function(){ return 7.2; }), borderColor:'#7c3aed', borderDash:[3,4], borderWidth:1.2, pointRadius:0, fill:false }
+        ]},
+      options:{ responsive:true,maintainAspectRatio:false,
+        plugins:{ legend:{position:'bottom',labels:{font:{size:10},boxWidth:12,padding:8,color:'#6b6960'}} },
+        scales:{ x:{ticks:{font:{size:10},color:'#9e9c93'}}, y:{ticks:{color:'#9e9c93',callback:function(v){return v+'%'}},beginAtZero:true} } }
+    });
+  }
+
+  // Gráfico barras agrupadas por equipe — total vs ISC
+  var eqTotMap = {}, eqIscMap2 = {};
+  for (var ti2 = 0; ti2 < totaisCirurgias.length; ti2++) {
+    var tr3 = totaisCirurgias[ti2];
+    var eq3 = tr3.equipe;
+    eqTotMap[eq3] = (eqTotMap[eq3]||0) + tr3.total;
+    eqIscMap2[eq3] = (eqIscMap2[eq3]||0) + iscNoMesEquipe(tr3.mes, eq3);
+  }
+  var eqKeys3 = Object.keys(eqTotMap).sort(function(a,b){ return eqTotMap[b]-eqTotMap[a]; });
+  if(cTaxaEq)cTaxaEq.destroy();
+  if(document.getElementById('ch-taxa-eq') && eqKeys3.length) {
+    // Calcula taxa % por equipe e cor baseada na meta
+    var taxasPorEq = eqKeys3.map(function(e){ return eqTotMap[e] ? parseFloat(((eqIscMap2[e]||0)/eqTotMap[e]*100).toFixed(2)) : 0; });
+    var coresPorEq = eqKeys3.map(function(e,idx2){ var t=taxasPorEq[idx2]; var st2=statusTaxa(t,e); return st2==='alta'?'#8b1a1a':st2==='atencao'?'#ba7500':'#2d6a2d'; });
+    cTaxaEq = new Chart(document.getElementById('ch-taxa-eq'),{
+      type:'bar',
+      data:{ labels:eqKeys3,
+        datasets:[
+          { label:'Total cirurgias', data:eqKeys3.map(function(e){return eqTotMap[e];}), backgroundColor:'rgba(26,58,107,0.15)', borderColor:'#1a3a6b', borderWidth:1.5, borderRadius:3, yAxisID:'y' },
+          { label:'ISC confirmadas', data:eqKeys3.map(function(e){return eqIscMap2[e]||0;}), backgroundColor:coresPorEq, borderWidth:0, borderRadius:3, yAxisID:'y2' }
+        ]},
+      options:{ responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom',labels:{font:{size:10},boxWidth:12,padding:8,color:'#6b6960'}},
+          tooltip:{callbacks:{footer:function(items){
+            var eq=items[0].label; var meta=metaEquipe(eq); var ti=eqTotMap[eq]||0; var ii=eqIscMap2[eq]||0;
+            var tx=ti?((ii/ti)*100).toFixed(2):'—';
+            return 'Taxa: '+tx+'%  |  Meta 2026: <'+meta+'%';
+          }}}
+        },
+        scales:{
+          x:{ticks:{font:{size:10},color:'#9e9c93'}},
+          y:{ticks:{color:'#9e9c93'},beginAtZero:true,title:{display:true,text:'Cirurgias',font:{size:10},color:'#9e9c93'}},
+          y2:{position:'right',ticks:{stepSize:1,color:'#8b1a1a'},beginAtZero:true,grid:{drawOnChartArea:false},title:{display:true,text:'ISC',font:{size:10},color:'#8b1a1a'}}
+        } }
+    });
+  }
+
+  // Gráfico linha dupla — evolução mensal cirurgias totais vs ISC
+  if(cTaxaEvolucao)cTaxaEvolucao.destroy();
+  if(document.getElementById('ch-taxa-evolucao') && mesesKeys.length) {
+    cTaxaEvolucao = new Chart(document.getElementById('ch-taxa-evolucao'),{
+      type:'bar',
+      data:{ labels:mesesKeys.map(fmtMes),
+        datasets:[
+          { label:'Total cirurgias', data:mesesKeys.map(function(m){return mesesMap[m].total;}), backgroundColor:'rgba(26,58,107,0.15)', borderColor:'#1a3a6b', borderWidth:1.5, borderRadius:3, type:'bar' },
+          { label:'ISC confirmadas', data:mesesKeys.map(function(m){return mesesMap[m].isc;}), backgroundColor:'#8b1a1a', borderColor:'#8b1a1a', borderWidth:0, borderRadius:3, type:'bar', yAxisID:'y2' }
+        ]},
+      options:{ responsive:true,maintainAspectRatio:false,
+        plugins:{ legend:{position:'bottom',labels:{font:{size:11},boxWidth:12,padding:8,color:'#6b6960'}} },
+        scales:{
+          x:{ticks:{font:{size:10},color:'#9e9c93'}},
+          y:{ticks:{color:'#9e9c93'},beginAtZero:true,title:{display:true,text:'Cirurgias',font:{size:10},color:'#9e9c93'}},
+          y2:{position:'right',ticks:{stepSize:1,color:'#8b1a1a'},beginAtZero:true,grid:{drawOnChartArea:false},title:{display:true,text:'ISC',font:{size:10},color:'#8b1a1a'}}
+        } }
     });
   }
 }
