@@ -198,6 +198,12 @@ textarea{resize:vertical;min-height:72px;}
 .badge-comp{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-family:var(--font-d);padding:3px 9px;border-radius:4px;font-weight:500;white-space:nowrap;}
 .badge-comp.completo{background:var(--green-bg);color:var(--green);}
 .badge-comp.parcial{background:var(--amber-bg);color:var(--amber);}
+/* DROPDOWN DE BUSCA DE PROCEDIMENTO */
+#proc-lista .proc-item{padding:8px 12px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text);}
+#proc-lista .proc-item:last-child{border-bottom:none;}
+#proc-lista .proc-item:hover{background:var(--surface2);}
+#proc-lista .proc-item.novo{color:var(--green);font-weight:500;}
+#proc-lista .proc-item.nenhum{color:var(--text3);cursor:default;font-style:italic;}
 /* ISC DETALHAMENTO */
 .isc-detalhe{padding:10px 14px;background:#fffafa;border-top:1px solid #f0c0c0;}
 .isc-grupo{margin-bottom:10px;}
@@ -383,7 +389,15 @@ textarea{resize:vertical;min-height:72px;}
       <div class="fg"><label>Médico solicitante</label><select id="f-sol" onchange="onMedChange()"><option value="">Selecione o médico...</option></select></div>
       <div class="fg"><label>Equipe cirúrgica</label><input type="text" id="f-eq-display" readonly placeholder="Preenchido automaticamente" style="background:var(--surface2);cursor:default;color:var(--text2);"><input type="hidden" id="f-eq-hidden"></div>
       <div class="fg"><label>Anestesista</label><select id="f-anest"><option value="">Selecione o anestesista...</option></select></div>
-      <div class="fg"><label>Procedimento cirúrgico</label><select id="f-proc"><option value="">Selecione...</option></select></div>
+      <div class="fg"><label>Procedimento cirúrgico</label>
+        <div style="position:relative;" id="proc-wrap">
+          <input type="text" id="f-proc-busca" placeholder="Buscar ou digitar procedimento..." autocomplete="off"
+            oninput="filtrarProcs()" onfocus="filtrarProcs()" onblur="setTimeout(function(){fecharListaProcs()},200)"
+            style="width:100%;">
+          <input type="hidden" id="f-proc">
+          <div id="proc-lista" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:0 0 var(--r) var(--r);max-height:200px;overflow-y:auto;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.08);"></div>
+        </div>
+      </div>
       <div class="fg"><label>Data da cirurgia</label><input type="date" id="f-data-d"></div>
       <div class="fg"><label>Hora de início</label><input type="time" id="f-data-h" oninput="calcTempoCirurgia()"></div>
       <div class="fg"><label>Hora de término</label><input type="time" id="f-data-fim" oninput="calcTempoCirurgia()"></div>
@@ -2542,23 +2556,26 @@ function renderLinhasAb() {
     return;
   }
   var html = '', i, l, opts = '', a;
+  // Opção especial "Não utilizado"
+  opts += '<option value="__nao_utilizado__">Não utilizado</option>';
   for (i = 0; i < abs.length; i++) {
     a = abs[i];
     opts += '<option value="' + a.id + '">' + a.nome + (a.gramatura?' ('+a.gramatura+'g)':'') + '</option>';
   }
   for (i = 0; i < abLinhas.length; i++) {
     l = abLinhas[i];
+    var naoUtil = l.abId === '__nao_utilizado__';
     html += '<div class="ab-linha">' +
       '<div><span class="fglbl">Antibiótico</span>' +
       '<select onchange="onAbLinha(\'' + l.id + '\',this.value)">' +
       '<option value="">Selecione...</option>' + opts.replace('value="'+l.abId+'"','value="'+l.abId+'" selected') +
       '</select></div>' +
       '<div><span class="fglbl">Valor/g (R$)</span>' +
-      '<input type="text" readonly value="' + (l.valorG ? fmtBRL(l.valorG)+'/g' : '') + '" style="background:var(--surface2);cursor:default;color:var(--text2);"></div>' +
+      '<input type="text" readonly value="' + (naoUtil ? '—' : (l.valorG ? fmtBRL(l.valorG)+'/g' : '')) + '" style="background:var(--surface2);cursor:default;color:var(--text2);"></div>' +
       '<div><span class="fglbl">Dose (g)</span>' +
-      '<input type="number" step="0.1" min="0" placeholder="Ex: 2" value="' + (l.dose||'') + '" oninput="onDoseLinha(\'' + l.id + '\',this.value)"></div>' +
+      '<input type="number" step="0.1" min="0" placeholder="Ex: 2" value="' + (naoUtil ? '' : (l.dose||'')) + '" ' + (naoUtil?'disabled style="background:var(--surface2);cursor:default;"':'') + ' oninput="onDoseLinha(\'' + l.id + '\',this.value)"></div>' +
       '<div><span class="fglbl">Total (R$)</span>' +
-      '<input type="text" readonly value="' + (l.total ? fmtBRL(l.total) : '') + '" style="background:var(--surface2);cursor:default;color:var(--text2);font-weight:500;"></div>' +
+      '<input type="text" readonly value="' + (naoUtil ? '—' : (l.total ? fmtBRL(l.total) : '')) + '" style="background:var(--surface2);cursor:default;color:var(--text2);font-weight:500;"></div>' +
       '<button class="ab-del-btn" onclick="removerLinhaAb(\'' + l.id + '\')" title="Remover">\xD7</button>' +
       '</div>';
   }
@@ -2570,8 +2587,12 @@ function renderLinhasAb() {
 function onAbLinha(id, abId) {
   var i, l = null, ab = null;
   for (i = 0; i < abLinhas.length; i++) if (abLinhas[i].id === id) { l = abLinhas[i]; break; }
-  for (i = 0; i < abs.length; i++) if (abs[i].id === abId) { ab = abs[i]; break; }
   if (!l) return;
+  if (abId === '__nao_utilizado__') {
+    l.abId = abId; l.valorG = ''; l.dose = ''; l.total = 0;
+    renderLinhasAb(); return;
+  }
+  for (i = 0; i < abs.length; i++) if (abs[i].id === abId) { ab = abs[i]; break; }
   l.abId = abId; l.valorG = ab ? ab.valor : '';
   var dose = parseFloat(l.dose) || 0;
   l.total = (l.valorG && dose) ? dose * parseFloat(l.valorG) : 0;
@@ -2585,6 +2606,68 @@ function onDoseLinha(id, val) {
   var dose = parseFloat(val) || 0;
   l.total = (l.valorG && dose) ? dose * parseFloat(l.valorG) : 0;
   renderLinhasAb();
+}
+
+/* =========================================================
+   BUSCA DE PROCEDIMENTO COM CADASTRO RÁPIDO
+   ========================================================= */
+function filtrarProcs() {
+  var busca = (document.getElementById('f-proc-busca').value || '').trim().toLowerCase();
+  var lista = document.getElementById('proc-lista');
+  if (!lista) return;
+  lista.style.display = 'block';
+  var html = '';
+  var encontrados = 0;
+  for (var i = 0; i < procs.length; i++) {
+    var p = procs[i];
+    var nome = (p.nome || p.name || p || '');
+    if (typeof nome !== 'string') nome = String(nome);
+    if (!busca || nome.toLowerCase().indexOf(busca) !== -1) {
+      html += '<div class="proc-item" onmousedown="selecionarProc(\'' + nome.replace(/'/g,"\\'") + '\')">' + nome + '</div>';
+      encontrados++;
+      if (encontrados >= 50) break; // limitar a 50 para performance
+    }
+  }
+  if (!busca && !encontrados) {
+    html = '<div class="proc-item nenhum">Nenhum procedimento cadastrado.</div>';
+  } else if (busca && !encontrados) {
+    html = '<div class="proc-item nenhum">Nenhum resultado para "' + busca + '"</div>';
+  }
+  // Opção de cadastrar novo se digitou algo não encontrado exatamente
+  if (busca) {
+    var existe = procs.some(function(p){ var n=(p.nome||p.name||p||''); return String(n).toLowerCase() === busca; });
+    if (!existe) {
+      var nomeFormatado = busca.charAt(0).toUpperCase() + busca.slice(1);
+      html += '<div class="proc-item novo" onmousedown="cadastrarEselecionarProc(\'' + nomeFormatado.replace(/'/g,"\\'") + '\')">+ Cadastrar "' + nomeFormatado + '"</div>';
+    }
+  }
+  lista.innerHTML = html;
+}
+
+function selecionarProc(nome) {
+  document.getElementById('f-proc-busca').value = nome;
+  document.getElementById('f-proc').value       = nome;
+  document.getElementById('proc-lista').style.display = 'none';
+}
+
+function fecharListaProcs() {
+  var lista = document.getElementById('proc-lista');
+  if (lista) lista.style.display = 'none';
+  // Se o campo está preenchido mas não corresponde a nenhum proc cadastrado nem ao hidden, mantém o texto digitado
+  var busca = document.getElementById('f-proc-busca');
+  var hidden = document.getElementById('f-proc');
+  if (busca && hidden && busca.value.trim()) {
+    hidden.value = busca.value.trim();
+  }
+}
+
+function cadastrarEselecionarProc(nome) {
+  // Cadastra o novo procedimento e já seleciona
+  var novoId = 'proc_' + Date.now();
+  procs.push({ id: novoId, nome: nome });
+  save();
+  selecionarProc(nome);
+  toast('Procedimento "' + nome + '" cadastrado e selecionado!');
 }
 
 /* =========================================================
@@ -2624,13 +2707,12 @@ function popNova() {
   selMedEl.innerHTML = html;
 
   var selProcEl = document.getElementById('f-proc');
+  var buscaEl   = document.getElementById('f-proc-busca');
   var curP = selProcEl ? selProcEl.value : '';
-  html = '<option value="">Selecione...</option>';
-  for (i = 0; i < procs.length; i++) {
-    p = procs[i];
-    html += '<option value="' + p.nome + '"' + (p.nome===curP?' selected':'') + '>' + p.nome + '</option>';
-  }
-  selProcEl.innerHTML = html;
+  // Mantém o valor atual no campo de busca se já estava preenchido
+  if (buscaEl && curP && !buscaEl.value) buscaEl.value = curP;
+  var procLista = document.getElementById('proc-lista');
+  if (procLista) procLista.style.display = 'none';
 
   var selAnestEl = document.getElementById('f-anest');
   var curA = selAnestEl ? selAnestEl.value : '';
@@ -2655,6 +2737,11 @@ function onMedChange() {
 }
 function salvarSol() {
   var alerta = 'form-alert';
+  // Sincroniza campo de procedimento (busca → hidden)
+  var _bp = document.getElementById('f-proc-busca');
+  var _hp = document.getElementById('f-proc');
+  if (_bp && _hp && _bp.value.trim()) _hp.value = _bp.value.trim();
+
   if (!g('f-pron') || !g('f-proc')) {
     alert2(alerta,'Preencha os campos obrigatórios: número do atendimento e procedimento.','er');
     return;
@@ -2718,7 +2805,7 @@ function salvarSol() {
   setTimeout(function(){ showTab('dashboard', document.querySelector('.nitem')); }, 900);
 }
 function limparForm() {
-  var ids = ['f-iniciais','f-pron','f-nasc','f-idade','f-peso','f-data-d','f-data-h','f-data-fim','f-duracao','f-hinfusao','f-obs'];
+  var ids = ['f-iniciais','f-pron','f-nasc','f-idade','f-peso','f-data-d','f-data-h','f-data-fim','f-duracao','f-hinfusao','f-obs','f-proc','f-proc-busca'];
   var i, el;
   for (i = 0; i < ids.length; i++) { el = document.getElementById(ids[i]); if (el) el.value = ''; }
   document.getElementById('f-genero').value = '';
@@ -3082,7 +3169,12 @@ function editarSol(idx) {
   // Preenche campos do paciente
   var set = function(id, v) { var el=document.getElementById(id); if(el) el.value = v||''; };
   set('f-iniciais', s.iniciais);
-  set('f-pron',    s.atendimento||s.prontuario);
+  set('f-pron',     s.atendimento||s.prontuario);
+  // Campo de busca de procedimento
+  var bEl = document.getElementById('f-proc-busca');
+  var hEl = document.getElementById('f-proc');
+  if (bEl) bEl.value = s.procedimento || '';
+  if (hEl) hEl.value = s.procedimento || '';
   set('f-nasc',    s.nascimento);
   set('f-idade',   s.idade);
   set('f-genero',  s.genero);
