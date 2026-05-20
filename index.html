@@ -1737,7 +1737,7 @@ function renderISC() {
       '<td style="font-size:12px;padding:10px;">' + (s.equipeNome||'—') + '</td>' +
       '<td style="font-size:12px;padding:10px;">' + (s.solicitante||'—') + '</td>' +
       '<td style="font-family:var(--font-d);font-size:12px;padding:10px;">' + fmtDate(d) + '</td>' +
-      '<td style="font-size:11px;padding:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (s.antibiotico||'—') + '</td>' +
+      '<td style="font-size:11px;padding:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (s.antibiotico==='__nao_utilizado__'?'Não utilizado':(s.antibiotico||'—')) + '</td>' +
       '<td style="padding:10px;text-align:center;">' +
         '<button onclick="toggleISC(' + idx2 + ')" style="' + btnStyle + 'padding:5px 11px;border-radius:var(--r);cursor:pointer;font-size:12px;font-family:var(--font-d);white-space:nowrap;">' +
           (temIsc2 ? '⚠ ISC confirmada' : 'Marcar ISC') +
@@ -2790,6 +2790,10 @@ function salvarSol() {
   var linhasSalvas = [];
   for (i = 0; i < linhasValidas.length; i++) {
     var l = linhasValidas[i];
+    if (l.abId === '__nao_utilizado__') {
+      linhasSalvas.push({ antibioticoId:'__nao_utilizado__', antibiotico:'Não utilizado', gramatura:'', valorG:'', dose:'', total:0 });
+      continue;
+    }
     var ab = null, j;
     for (j = 0; j < abs.length; j++) if (abs[j].id === l.abId) { ab = abs[j]; break; }
     linhasSalvas.push({
@@ -2801,7 +2805,9 @@ function salvarSol() {
       total: l.total
     });
   }
-  var abNomeStr = linhasSalvas.length ? linhasSalvas.map(function(x){return x.antibiotico;}).join(' + ') : '';
+  // Se todas as linhas são "Não utilizado" ou não há linhas, marca como não utilizado
+  var todasNaoUtil = linhasSalvas.length > 0 && linhasSalvas.every(function(x){ return x.antibioticoId === '__nao_utilizado__'; });
+  var abNomeStr = todasNaoUtil ? 'Não utilizado' : linhasSalvas.filter(function(x){ return x.antibioticoId !== '__nao_utilizado__'; }).map(function(x){return x.antibiotico;}).join(' + ');
 
   sols.push({
     id: Date.now(),
@@ -2868,7 +2874,7 @@ function renderDash() {
     s = rec[i];
     html += '<tr>' +
       '<td style="font-family:var(--font-d);font-size:12px;">' + (s.atendimento||s.prontuario||'—') + '</td>' +
-      '<td style="font-size:12px;">' + (s.antibiotico||'—') + '</td>' +
+      '<td style="font-size:12px;">' + (s.antibiotico==='__nao_utilizado__'?'Não utilizado':(s.antibiotico||'—')) + '</td>' +
       '<td>' + (s.solicitante||'—') + '</td>' +
       '<td>' + (s.anestesista||'—') + '</td>' +
       '<td>' + (s.equipeNome||'—') + '</td>' +
@@ -2926,7 +2932,7 @@ function renderReg() {
     html += '<tr>' +
       '<td style="font-family:var(--font-d);font-size:12px;">' + (s.atendimento||s.prontuario||'—') + '</td>' +
       '<td style="font-size:12px;">' + (s.procedimento||'—') + '</td>' +
-      '<td style="font-size:12px;">' + (s.antibiotico||'—') + '</td>' +
+      '<td style="font-size:12px;">' + (s.antibiotico==='__nao_utilizado__'?'Não utilizado':(s.antibiotico||'—')) + '</td>' +
       '<td style="font-family:var(--font-d);font-size:12px;">' + (s.antibioticoValor ? fmtBRL(s.antibioticoValor) : '—') + '</td>' +
       '<td>' + (s.equipeNome||'—') + '</td>' +
       '<td>' + (s.solicitante||'—') + '</td>' +
@@ -3103,8 +3109,9 @@ function verDet(idx) {
   if (s.antibioticos && s.antibioticos.length) {
     for (i=0;i<s.antibioticos.length;i++){
       l=s.antibioticos[i];
-      absHtml += '<div class="drow" style="padding-left:8px;"><div class="dkey" style="min-width:130px;">'+l.antibiotico+'</div>' +
-        '<div class="dval">'+(l.dose?l.dose+'g':'—')+(l.total?' \xB7 '+fmtBRL(l.total):'')+'</div></div>';
+      var nomeAb = (l.antibioticoId==='__nao_utilizado__'||l.antibiotico==='__nao_utilizado__') ? 'Não utilizado' : (l.antibiotico||'—');
+      absHtml += '<div class="drow" style="padding-left:8px;"><div class="dkey" style="min-width:130px;">'+nomeAb+'</div>' +
+        '<div class="dval">'+(l.antibioticoId==='__nao_utilizado__'?'—':(l.dose?l.dose+'g':'—')+(l.total?' \xB7 '+fmtBRL(l.total):''))+'</div></div>';
     }
     if (s.antibioticoValor) totalStr = fmtBRL(s.antibioticoValor);
   }
@@ -3265,8 +3272,13 @@ function atualizarSol() {
   for (j=0; j<abLinhas.length; j++) totalGeral += abLinhas[j].total||0;
   var linhasValidas = [];
   for (j=0; j<abLinhas.length; j++) if (abLinhas[j].abId) linhasValidas.push(abLinhas[j]);
-  var abNomeStr = linhasValidas.map(function(l){ var ab=null,k; for(k=0;k<abs.length;k++) if(abs[k].id===l.abId){ab=abs[k];break;} return ab?ab.nome+(ab.gramatura?' '+ab.gramatura+'g':''):''; }).join(' + ');
-  var linhasSalvas = linhasValidas.map(function(l){ var ab=null,k; for(k=0;k<abs.length;k++) if(abs[k].id===l.abId){ab=abs[k];break;} return {antibioticoId:l.abId,antibiotico:ab?ab.nome+(ab.gramatura?' '+ab.gramatura+'g':''):'',valorG:l.valorG,dose:l.dose,total:l.total}; });
+  var linhasSalvas = linhasValidas.map(function(l) {
+    if (l.abId === '__nao_utilizado__') return { antibioticoId:'__nao_utilizado__', antibiotico:'Não utilizado', gramatura:'', valorG:'', dose:'', total:0 };
+    var ab=null,k; for(k=0;k<abs.length;k++) if(abs[k].id===l.abId){ab=abs[k];break;}
+    return {antibioticoId:l.abId, antibiotico:ab?ab.nome+(ab.gramatura?' '+ab.gramatura+'g':''):'', valorG:l.valorG, dose:l.dose, total:l.total};
+  });
+  var todasNaoUtil2 = linhasSalvas.length > 0 && linhasSalvas.every(function(x){ return x.antibioticoId==='__nao_utilizado__'; });
+  var abNomeStr = todasNaoUtil2 ? 'Não utilizado' : linhasSalvas.filter(function(x){ return x.antibioticoId!=='__nao_utilizado__'; }).map(function(x){return x.antibiotico;}).join(' + ');
   // Preserva o id e criadoEm originais, e dados de isc/auditoria/prevencao
   var idOrig   = sols[_editIdx].id;
   var criadoEm = sols[_editIdx].criadoEm;
