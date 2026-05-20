@@ -1218,11 +1218,12 @@ var PREV_CAMPOS = [
   { id:'glicemia_pos',      label:'Glicemia pós-operatório',   temNaoAv: false, temNA: false, somenteEquipe: null },
   { id:'banho_pre',         label:'Banho pré-operatório',      temNaoAv: false, temNA: false, somenteEquipe: null },
   { id:'tricotomia',        label:'Tricotomia',                temNaoAv: false, temNA: true,  somenteEquipe: null },
-  { id:'preparo_pele',      label:'Preparo da pele',           temNaoAv: true,  temNA: false, somenteEquipe: null },
-  { id:'degermacao',        label:'Degermação das mãos',       temNaoAv: true,  temNA: false, somenteEquipe: null },
-  { id:'controle_pessoal',  label:'Controle de pessoal em sala', temNaoAv: false, temNA: false, somenteEquipe: null },
-  { id:'desinfeccao_sala',  label:'Desinfecção de sala',       temNaoAv: false, temNA: false, somenteEquipe: null },
-  { id:'sem_adornos',       label:'Sem adornos',               temNaoAv: false, temNA: false, somenteEquipe: null },
+  { id:'preparo_pele',      label:'Preparo da pele',           temNaoAv: false, temNA: true,  somenteEquipe: null },
+  { id:'degermacao',        label:'Degermação das mãos',       temNaoAv: false, temNA: true,  somenteEquipe: null },
+  { id:'antissepsia_maos',  label:'Antissepsia das mãos',      temNaoAv: false, temNA: true,  somenteEquipe: null },
+  { id:'controle_pessoal',  label:'Controle de pessoal em sala', temNaoAv: false, temNA: true, somenteEquipe: null },
+  { id:'desinfeccao_sala',  label:'Desinfecção de sala',       temNaoAv: false, temNA: true,  somenteEquipe: null },
+  { id:'sem_adornos',       label:'Sem adornos',               temNaoAv: false, temNA: true,  somenteEquipe: null },
   { id:'antissepsia_bucal', label:'Antissepsia bucal',         temNaoAv: false, temNA: false, somenteEquipe: null },
   { id:'preparo_colorretal',label:'Preparo ATM do colorretal', temNaoAv: false, temNA: true,  somenteEquipe: 'SAD' }
 ];
@@ -1288,21 +1289,18 @@ function renderPrevCampos(prev, equipeNome) {
   var eq = (equipeNome || '').toUpperCase();
   for (var i = 0; i < PREV_CAMPOS.length; i++) {
     var c = PREV_CAMPOS[i];
-    // Campo SAD: mostra só se equipe contém SAD
     if (c.somenteEquipe && eq.indexOf(c.somenteEquipe) === -1) continue;
     var val    = prev[c.id] || '';
     var obsVal = prev[c.id + '_obs'] || '';
     var isConf  = val === 'conforme';
     var isNConf = val === 'nao_conforme';
-    var isNAv   = val === 'nao_avaliado';
-    var isNA    = val === 'na';
+    var isNA    = val === 'na' || val === 'nao_avaliado'; // compatibilidade com registros antigos
     html += '<div class="prev-item">' +
       '<div class="prev-label">' + c.label + '</div>' +
       '<div class="prev-opts">' +
         '<button class="prev-opt' + (isConf  ? ' conf'  : '') + '" onclick="setPrev(\'' + c.id + '\',\'conforme\')"     id="btn_conf_'  + c.id + '">Conforme</button>' +
         '<button class="prev-opt' + (isNConf ? ' nconf' : '') + '" onclick="setPrev(\'' + c.id + '\',\'nao_conforme\')" id="btn_nconf_' + c.id + '">Não conforme</button>' +
-        (c.temNaoAv ? '<button class="prev-opt' + (isNAv ? ' nav' : '') + '" onclick="setPrev(\'' + c.id + '\',\'nao_avaliado\')" id="btn_nav_' + c.id + '">Não avaliado</button>' : '') +
-        (c.temNA    ? '<button class="prev-opt' + (isNA  ? ' nav' : '') + '" onclick="setPrev(\'' + c.id + '\',\'na\')"            id="btn_na_'  + c.id + '">NA</button>' : '') +
+        (c.temNA ? '<button class="prev-opt' + (isNA ? ' nav' : '') + '" onclick="setPrev(\'' + c.id + '\',\'na\')" id="btn_na_' + c.id + '">N/A</button>' : '') +
       '</div>' +
       '<div class="prev-obs" id="obs_' + c.id + '" style="display:' + (isNConf ? 'block' : 'none') + ';">' +
         '<input type="text" id="val_' + c.id + '" value="' + obsVal + '" placeholder="Especifique o motivo...">' +
@@ -1315,18 +1313,15 @@ function renderPrevCampos(prev, equipeNome) {
 function setPrev(campo, valor) {
   var btnConf  = document.getElementById('btn_conf_'  + campo);
   var btnNConf = document.getElementById('btn_nconf_' + campo);
-  var btnNAv   = document.getElementById('btn_nav_'   + campo);
   var btnNA    = document.getElementById('btn_na_'    + campo);
   var obsDiv   = document.getElementById('obs_' + campo);
   if (btnConf)  btnConf.className  = 'prev-opt';
   if (btnNConf) btnNConf.className = 'prev-opt';
-  if (btnNAv)   btnNAv.className   = 'prev-opt';
   if (btnNA)    btnNA.className    = 'prev-opt';
   if (obsDiv)   obsDiv.style.display = 'none';
   if (valor === 'conforme'     && btnConf)  btnConf.className  = 'prev-opt conf';
-  if (valor === 'nao_conforme' && btnNConf) { btnNConf.className = 'prev-opt nconf'; if(obsDiv){obsDiv.style.display='block'; document.getElementById('val_'+campo).focus();} }
-  if (valor === 'nao_avaliado' && btnNAv)   btnNAv.className   = 'prev-opt nav';
-  if (valor === 'na'           && btnNA)    btnNA.className     = 'prev-opt nav';
+  if (valor === 'nao_conforme' && btnNConf) { btnNConf.className = 'prev-opt nconf'; if(obsDiv){obsDiv.style.display='block'; var vi=document.getElementById('val_'+campo); if(vi)vi.focus();} }
+  if ((valor === 'na' || valor === 'nao_avaliado') && btnNA) btnNA.className = 'prev-opt nav';
 }
 
 function salvarPrevencao() {
@@ -1343,11 +1338,9 @@ function salvarPrevencao() {
     if (c.somenteEquipe && eqAtual.indexOf(c.somenteEquipe) === -1) continue;
     var btnConf  = document.getElementById('btn_conf_'  + c.id);
     var btnNConf = document.getElementById('btn_nconf_' + c.id);
-    var btnNAv   = document.getElementById('btn_nav_'   + c.id);
     var btnNA    = document.getElementById('btn_na_'    + c.id);
     if      (btnConf  && btnConf.className.indexOf('conf')  !== -1 && btnConf.className.indexOf('nconf') === -1) { prev[c.id] = 'conforme'; }
     else if (btnNConf && btnNConf.className.indexOf('nconf') !== -1) { prev[c.id] = 'nao_conforme'; prev[c.id+'_obs'] = document.getElementById('val_'+c.id) ? document.getElementById('val_'+c.id).value : ''; }
-    else if (btnNAv   && btnNAv.className.indexOf('nav')    !== -1) { prev[c.id] = 'nao_avaliado'; }
     else if (btnNA    && btnNA.className.indexOf('nav')     !== -1) { prev[c.id] = 'na'; }
   }
   sols[idx].prevencao = prev;
@@ -1367,14 +1360,15 @@ function salvarPrevencao() {
     var nomesMap = {
       normotermia:'Normotermia', glicemia_pre:'Glicemia pré-op', glicemia_pos:'Glicemia pós-op',
       banho_pre:'Banho pré-op', tricotomia:'Tricotomia', preparo_pele:'Preparo da pele',
-      degermacao:'Degermação das mãos', controle_pessoal:'Controle de pessoal', desinfeccao_sala:'Desinfecção de sala',
+      degermacao:'Degermação das mãos', antissepsia_maos:'Antissepsia das mãos',
+      controle_pessoal:'Controle de pessoal', desinfeccao_sala:'Desinfecção de sala',
       sem_adornos:'Sem adornos', antissepsia_bucal:'Antissepsia bucal', preparo_colorretal:'Preparo ATM colorretal'
     };
     var bgCores  = { conforme:'#e8f3e8', nao_conforme:'#fdeaea', nao_avaliado:'#fef3d9', na:'#f0efe9' };
     var txtCores = { conforme:'var(--green)', nao_conforme:'var(--red)', nao_avaliado:'var(--amber)', na:'var(--text3)' };
     var bdCores  = { conforme:'#b8dbb8', nao_conforme:'#f0c0c0', nao_avaliado:'#f5dda0', na:'var(--border)' };
-    var icons    = { conforme:'✓', nao_conforme:'✗', nao_avaliado:'—', na:'NA' };
-    var labels   = { conforme:'Conforme', nao_conforme:'Não conforme', nao_avaliado:'Não avaliado', na:'NA' };
+    var icons    = { conforme:'✓', nao_conforme:'✗', nao_avaliado:'N/A', na:'N/A' };
+    var labels   = { conforme:'Conforme', nao_conforme:'Não conforme', nao_avaliado:'N/A', na:'N/A' };
 
     var solAtual = sols[idx];
     var pacInfo  = (solAtual.iniciais ? '<strong>' + solAtual.iniciais + '</strong> · ' : '') +
@@ -2562,6 +2556,8 @@ function renderLinhasAb() {
     a = abs[i];
     opts += '<option value="' + a.id + '">' + a.nome + (a.gramatura?' ('+a.gramatura+'g)':'') + '</option>';
   }
+  // Opção de cadastrar novo antibiótico
+  opts += '<option value="__novo__">+ Cadastrar novo antibiótico...</option>';
   for (i = 0; i < abLinhas.length; i++) {
     l = abLinhas[i];
     var naoUtil = l.abId === '__nao_utilizado__';
@@ -2591,6 +2587,24 @@ function onAbLinha(id, abId) {
   if (abId === '__nao_utilizado__') {
     l.abId = abId; l.valorG = ''; l.dose = ''; l.total = 0;
     renderLinhasAb(); return;
+  }
+  if (abId === '__novo__') {
+    // Cadastro rápido de antibiótico
+    var nome = prompt('Nome do antibiótico:\n(Ex: Ampicilina 1g)');
+    if (!nome || !nome.trim()) { renderLinhasAb(); return; }
+    nome = nome.trim();
+    var gram  = prompt('Gramatura (g):\n(Ex: 1 — deixe em branco se não souber)') || '';
+    var valor = prompt('Valor por grama (R$):\n(Ex: 1.50 — deixe em branco se não souber)') || '';
+    var novoId = 'ab_' + Date.now();
+    abs.push({ id: novoId, nome: nome, gramatura: gram.trim(), valor: valor.trim() });
+    save();
+    l.abId  = novoId;
+    l.valorG= valor.trim();
+    l.dose  = '';
+    l.total = 0;
+    toast('Antibiótico "' + nome + '" cadastrado!');
+    renderLinhasAb();
+    return;
   }
   for (i = 0; i < abs.length; i++) if (abs[i].id === abId) { ab = abs[i]; break; }
   l.abId = abId; l.valorG = ab ? ab.valor : '';
@@ -3107,15 +3121,17 @@ function verDet(idx) {
     var nomes = {
       normotermia:'Normotermia', glicemia_pre:'Glicemia pré-op', glicemia_pos:'Glicemia pós-op',
       banho_pre:'Banho pré-op', tricotomia:'Tricotomia', preparo_pele:'Preparo da pele',
-      degermacao:'Degermação das mãos', controle_pessoal:'Controle de pessoal', desinfeccao_sala:'Desinfecção de sala',
+      degermacao:'Degermação das mãos', antissepsia_maos:'Antissepsia das mãos',
+      controle_pessoal:'Controle de pessoal', desinfeccao_sala:'Desinfecção de sala',
       sem_adornos:'Sem adornos', antissepsia_bucal:'Antissepsia bucal', preparo_colorretal:'Preparo ATM colorretal'
     };
     var prevHtml = '';
     for (var campo in nomes) {
       var vp = s.prevencao[campo];
       if (vp) {
-        var cor = vp === 'conforme' ? 'color:var(--green);' : 'color:var(--red);';
-        var txt = vp === 'conforme' ? 'Conforme' : 'Não conforme' + (s.prevencao[campo+'_obs'] ? ' — ' + s.prevencao[campo+'_obs'] : '');
+        var isNA2 = vp === 'na' || vp === 'nao_avaliado';
+        var cor = vp === 'conforme' ? 'color:var(--green);' : isNA2 ? 'color:var(--text3);' : 'color:var(--red);';
+        var txt = vp === 'conforme' ? 'Conforme' : isNA2 ? 'N/A' : 'Não conforme' + (s.prevencao[campo+'_obs'] ? ' — ' + s.prevencao[campo+'_obs'] : '');
         prevHtml += '<div style="display:flex;gap:8px;margin-bottom:4px;font-size:12px;"><span style="min-width:160px;color:var(--text3);">' + nomes[campo] + '</span><span style="' + cor + 'font-weight:500;">' + txt + '</span></div>';
       }
     }
@@ -3412,8 +3428,8 @@ function renderCharts() {
   cT=new Chart(document.getElementById('ch-t'),{type:'line',data:{labels:days,datasets:[{data:days.map(function(d2){return dC[d2];}),borderColor:'#1a1916',backgroundColor:'rgba(26,25,22,0.07)',fill:true,tension:0.35,pointRadius:4,pointBackgroundColor:'#1a1916'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11},color:'#9e9c93'}},y:{ticks:{stepSize:1,color:'#9e9c93'}}}}});
 
   // ── Gráficos de Medidas de Prevenção ──────────────────
-  var prevNomes = ['Normotermia','Glicemia pré-op','Glicemia pós-op','Banho pré-op','Tricotomia','Preparo da pele','Degermação das mãos','Controle de pessoal','Desinfecção de sala','Sem adornos','Antissepsia bucal'];
-  var prevIds   = ['normotermia','glicemia_pre','glicemia_pos','banho_pre','tricotomia','preparo_pele','degermacao','controle_pessoal','desinfeccao_sala','sem_adornos','antissepsia_bucal'];
+  var prevNomes = ['Normotermia','Glicemia pré-op','Glicemia pós-op','Banho pré-op','Tricotomia','Preparo da pele','Degermação das mãos','Antissepsia das mãos','Controle de pessoal','Desinfecção de sala','Sem adornos','Antissepsia bucal'];
+  var prevIds   = ['normotermia','glicemia_pre','glicemia_pos','banho_pre','tricotomia','preparo_pele','degermacao','antissepsia_maos','controle_pessoal','desinfeccao_sala','sem_adornos','antissepsia_bucal'];
   // Preparo ATM colorretal é exibido separado (só SAD)
   var prevConf=[], prevNConf=[], prevNAv=[], prevNPr=[];
   var solsComPrev = sols.filter(function(s){ return s.prevencao; });
