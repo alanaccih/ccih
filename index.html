@@ -1141,6 +1141,7 @@ function save() {
   _saveTimer = setTimeout(function() {
     db.ref(DB_REF).set({
       sols:sols, meds:meds, eqs:eqs, procs:procs, abs:abs, anests:anests,
+      totaisCirurgias: totaisCirurgias,
       updatedAt: new Date().toISOString()
     })
     .then(function(){
@@ -1162,6 +1163,7 @@ function salvarLocal() {
     localStorage.setItem('ccih_procs',   JSON.stringify(procs));
     localStorage.setItem('ccih_abs',     JSON.stringify(abs));
     localStorage.setItem('ccih_anests',  JSON.stringify(anests));
+    localStorage.setItem('ccih_totais',  JSON.stringify(totaisCirurgias));
   } catch(e) {}
 }
 function carregarDoLocal() {
@@ -1172,6 +1174,7 @@ function carregarDoLocal() {
     procs  = JSON.parse(localStorage.getItem('ccih_procs')   || '[]');
     abs    = JSON.parse(localStorage.getItem('ccih_abs')     || '[]');
     anests = JSON.parse(localStorage.getItem('ccih_anests')  || '[]');
+    totaisCirurgias = JSON.parse(localStorage.getItem('ccih_totais') || '[]');
   } catch(e) {}
 }
 function atualizarSync(s) {
@@ -1929,9 +1932,18 @@ function salvarTaxaISC() {
 }
 
 function saveTotais() {
-  // Salva totaisCirurgias no Firebase como parte do nó ccih
-  db.ref(DB_REF + '/totaisCirurgias').set(totaisCirurgias).catch(function(){});
+  // Salva totaisCirurgias junto com todos os outros dados (evita sobrescrever)
   try { localStorage.setItem('ccih_totais', JSON.stringify(totaisCirurgias)); } catch(e) {}
+  if (_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(function() {
+    db.ref(DB_REF).set({
+      sols:sols, meds:meds, eqs:eqs, procs:procs, abs:abs, anests:anests,
+      totaisCirurgias: totaisCirurgias,
+      updatedAt: new Date().toISOString()
+    })
+    .then(function(){ _saveTimer = null; atualizarSync('ok'); })
+    .catch(function(){ _saveTimer = null; atualizarSync('offline'); });
+  }, 800);
 }
 
 function excluirTotalISC(id) {
@@ -3255,13 +3267,15 @@ function atualizarSol() {
   for (j=0; j<abLinhas.length; j++) if (abLinhas[j].abId) linhasValidas.push(abLinhas[j]);
   var abNomeStr = linhasValidas.map(function(l){ var ab=null,k; for(k=0;k<abs.length;k++) if(abs[k].id===l.abId){ab=abs[k];break;} return ab?ab.nome+(ab.gramatura?' '+ab.gramatura+'g':''):''; }).join(' + ');
   var linhasSalvas = linhasValidas.map(function(l){ var ab=null,k; for(k=0;k<abs.length;k++) if(abs[k].id===l.abId){ab=abs[k];break;} return {antibioticoId:l.abId,antibiotico:ab?ab.nome+(ab.gramatura?' '+ab.gramatura+'g':''):'',valorG:l.valorG,dose:l.dose,total:l.total}; });
-  // Preserva o id e criadoEm originais
-  var idOrig = sols[_editIdx].id;
+  // Preserva o id e criadoEm originais, e dados de isc/auditoria/prevencao
+  var idOrig   = sols[_editIdx].id;
   var criadoEm = sols[_editIdx].criadoEm;
+  var iscOrig  = sols[_editIdx] ? sols[_editIdx].isc       : null;
   sols[_editIdx] = {
     id:idOrig, criadoEm:criadoEm, editadoEm:new Date().toISOString(),
     auditoria: sols[_editIdx] ? sols[_editIdx].auditoria : null,
     prevencao:  sols[_editIdx] ? sols[_editIdx].prevencao  : null,
+    isc:        iscOrig,
     iniciais:    g('f-iniciais'),
     atendimento: g('f-pron'), nascimento:g('f-nasc'), idade:g('f-idade'),
     genero:g('f-genero'), peso:g('f-peso'), procedimento:g('f-proc'),
