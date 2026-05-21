@@ -2132,6 +2132,10 @@ function toast(msg,erro){
 }
 
 window.onerror=function(msg,src,linha){
+  // Ignora erros de scripts externos (linha 0 = cross-origin: Firebase, Chart.js, etc.)
+  if (!linha || linha === 0) return true;
+  // Ignora erros genéricos sem mensagem útil
+  if (msg === 'Script error.' || msg === 'Script error') return true;
   var el=document.getElementById('import-toast');
   if(el){el.textContent='Erro: '+msg+' (L'+linha+')';el.style.background='var(--red)';el.classList.add('show');setTimeout(function(){el.classList.remove('show');},6000);}
 };
