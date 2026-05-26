@@ -1232,10 +1232,25 @@ var PREV_CAMPOS = [
 ];
 
 function isCompleto(s) {
+  // 1 — Dados básicos da solicitação
+  if (!s.atendimento && !s.prontuario) return false;
+  if (!s.procedimento) return false;
+  if (!s.solicitante)  return false;
+  if (!s.dataCirurgia && !s.data) return false;
+
+  // 2 — Medidas de prevenção (todos os campos aplicáveis)
   if (!s.prevencao) return false;
+  var eq = (s.equipeNome || '').toUpperCase();
   for (var i = 0; i < PREV_CAMPOS.length; i++) {
-    if (!s.prevencao[PREV_CAMPOS[i].id]) return false;
+    var c = PREV_CAMPOS[i];
+    // Pula campos condicionais de outra equipe
+    if (c.somenteEquipe && eq.indexOf(c.somenteEquipe) === -1) continue;
+    if (!s.prevencao[c.id]) return false;
   }
+
+  // 3 — Auditoria de antibióticos
+  if (!s.auditoria || !s.auditoria.classificacao) return false;
+
   return true;
 }
 
@@ -1256,12 +1271,31 @@ function popPrevencao() {
     var da = a.dataCirurgia||''; var db2 = b.dataCirurgia||'';
     return db2.localeCompare(da);
   });
+  var semPrev = 0;
   for (var i = 0; i < lista.length; i++) {
     var s = lista[i];
-    var comp = isCompleto(s) ? ' ✓' : ' ⚠';
+    // Verifica se prevenção está completa para este registro
+    var eq = (s.equipeNome || '').toUpperCase();
+    var prevCompleta = !!s.prevencao;
+    if (prevCompleta) {
+      for (var j = 0; j < PREV_CAMPOS.length; j++) {
+        var c = PREV_CAMPOS[j];
+        if (c.somenteEquipe && eq.indexOf(c.somenteEquipe) === -1) continue;
+        if (!s.prevencao[c.id]) { prevCompleta = false; break; }
+      }
+    }
+    // Mostra apenas registros SEM prevenção completa
+    if (prevCompleta) continue;
+    semPrev++;
     sel.innerHTML += '<option value="' + s.id + '"' + (s.id == curVal ? ' selected' : '') + '>' +
+      (s.iniciais ? s.iniciais + ' · ' : '') +
       (s.atendimento||s.prontuario||s.id) + ' — ' + (s.procedimento||'') +
-      ' (' + fmtDate(s.dataCirurgia||s.data) + ')' + comp + '</option>';
+      ' (' + fmtDate(s.dataCirurgia||s.data) + ')' +
+      (s.equipeNome ? ' · ' + s.equipeNome : '') +
+    '</option>';
+  }
+  if (!semPrev) {
+    sel.innerHTML = '<option value="">✓ Todos os registros já têm medidas de prevenção!</option>';
   }
   // Esconde o formulário ao recarregar lista
   document.getElementById('prev-form-card').style.display = 'none';
@@ -1505,13 +1539,21 @@ function popAuditoria() {
       var da = a.dataCirurgia||''; var db2 = b.dataCirurgia||'';
       return db2.localeCompare(da);
     });
+    var semAuditoria = 0;
     for (var i = 0; i < lista.length; i++) {
       var s = lista[i];
-      var status = isAuditado(s) ? ' ✓' : ' ⚠';
+      // Mostra apenas registros SEM auditoria preenchida
+      if (s.auditoria && s.auditoria.classificacao) continue;
+      semAuditoria++;
       sel.innerHTML += '<option value="' + s.id + '"' + (String(s.id)===String(curVal)?' selected':'') + '>' +
         (s.iniciais ? s.iniciais + ' · ' : '') +
         (s.atendimento||s.prontuario||s.id) + ' — ' + (s.procedimento||'') +
-        ' (' + fmtDate(s.dataCirurgia||s.data) + ')' + status + '</option>';
+        ' (' + fmtDate(s.dataCirurgia||s.data) + ')' +
+        (s.equipeNome ? ' · ' + s.equipeNome : '') +
+      '</option>';
+    }
+    if (!semAuditoria) {
+      sel.innerHTML = '<option value="">✓ Todos os registros já foram auditados!</option>';
     }
   }
   document.getElementById('audit-form-card').style.display = 'none';
