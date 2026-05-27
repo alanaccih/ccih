@@ -31,7 +31,7 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height
 .nitem:hover{background:var(--surface2);color:var(--text);}
 .nitem.active{background:var(--text);color:#fff;}
 .nitem svg{width:14px;height:14px;flex-shrink:0;}
-.main{flex:1;padding:2rem;overflow-x:hidden;}
+.main{flex:1;padding:2rem;overflow-x:auto;}
 .phdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2rem;}
 .ptitle{font-family:var(--font-d);font-size:22px;font-weight:500;letter-spacing:-.02em;}
 .psub{font-size:13px;color:var(--text2);margin-top:2px;}
@@ -295,7 +295,7 @@ textarea{resize:vertical;min-height:72px;}
     </button>
     <button class="hbtn" onclick="fazerLogout()" title="Sair" style="border-color:rgba(255,100,100,.4);">
       <svg viewBox="0 0 13 13" fill="none"><path d="M5 1H2a1 1 0 00-1 1v9a1 1 0 001 1h3M9 9l3-3-3-3M12 6.5H5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Sair
+      Sair (<span id="header-usuario" style="display:none;"></span>)
     </button>
     <input type="file" id="import-input" accept=".json" style="display:none;" onchange="importarJSON(event)">
   </div>
@@ -351,6 +351,14 @@ textarea{resize:vertical;min-height:72px;}
     <button class="nitem" onclick="showTab('graficos',this)">
       <svg viewBox="0 0 14 14" fill="none"><path d="M1 11L4 7l3 2 3-5 3 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Gráficos
     </button>
+  </div>
+  <div id="nav-admin" style="display:none;">
+    <div class="nsec">
+      <div class="nlabel">Administrador</div>
+      <button class="nitem" onclick="showTab('atividade',this)">
+        <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 12c0-2.8 2.2-4 5-4s5 1.2 5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Atividade dos usuários
+      </button>
+    </div>
   </div>
 </nav>
 
@@ -443,6 +451,9 @@ textarea{resize:vertical;min-height:72px;}
       </select>
     </div>
     <div id="prev-info" style="margin-top:10px;font-size:12px;color:var(--text3);display:none;"></div>
+    <div id="prev-todas-ok" style="display:none;margin-top:12px;padding:12px 16px;background:var(--green-bg);border:1.5px solid #b8dbb8;border-radius:var(--r);font-size:13px;color:var(--green);font-weight:500;">
+      ✓ Todas as cirurgias já foram classificadas nas medidas de prevenção
+    </div>
   </div>
   <!-- Formulário de medidas -->
   <div class="card" id="prev-form-card" style="display:none;">
@@ -475,8 +486,10 @@ textarea{resize:vertical;min-height:72px;}
       <input type="date" id="fr-de" onchange="renderReg()" title="A partir de">
       <input type="date" id="fr-ate" onchange="renderReg()" title="Até">
     </div>
-    <table><thead><tr><th>Atendimento</th><th>Procedimento</th><th>Antibiótico</th><th>Valor</th><th>Equipe</th><th>Médico</th><th>Data</th><th>Duração</th><th>Status</th><th>Auditoria</th><th>Ações</th></tr></thead>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+    <table style="min-width:900px;"><thead><tr><th>Atendimento</th><th>Procedimento</th><th>Antibiótico</th><th>Valor</th><th>Equipe</th><th>Médico</th><th>Data</th><th>Duração</th><th>Status</th><th>Auditoria</th><th>Ações</th></tr></thead>
     <tbody id="all-tbody"><tr><td colspan="11" class="empty">Nenhum registro encontrado.</td></tr></tbody></table>
+    </div>
   </div>
 </div>
 
@@ -484,7 +497,13 @@ textarea{resize:vertical;min-height:72px;}
 <div class="section" id="tab-medicos">
   <div class="phdr">
     <div><div class="ptitle">Médicos</div><div class="psub">Cadastro de médicos do hospital</div></div>
-    <button class="btn pri" onclick="abrirNovoMed()"><svg viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Novo médico</button>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" onclick="recalcularEquipes()" title="Atualiza a equipe em todos os registros conforme o cadastro atual dos médicos" style="font-size:12px;">
+        <svg viewBox="0 0 13 13" fill="none"><path d="M11.5 6.5A5 5 0 1 1 6.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M8.5 1.5l2 1-1 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Recalcular equipes
+      </button>
+      <button class="btn pri" onclick="abrirNovoMed()"><svg viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Novo médico</button>
+    </div>
   </div>
   <div id="med-alert" class="alert"></div>
   <div class="mlayout">
@@ -705,6 +724,9 @@ textarea{resize:vertical;min-height:72px;}
       </select>
     </div>
     <div id="audit-info" style="margin-top:10px;font-size:12px;color:var(--text3);display:none;"></div>
+    <div id="audit-todas-ok" style="display:none;margin-top:12px;padding:12px 16px;background:var(--green-bg);border:1.5px solid #b8dbb8;border-radius:var(--r);font-size:13px;color:var(--green);font-weight:500;">
+      ✓ Todas as cirurgias já foram auditadas
+    </div>
   </div>
 
   <!-- Formulário de auditoria -->
@@ -986,6 +1008,39 @@ textarea{resize:vertical;min-height:72px;}
   </div>
 </div>
 
+<!-- ATIVIDADE DOS USUÁRIOS (somente Admin) -->
+<div class="section" id="tab-atividade">
+  <div class="phdr">
+    <div><div class="ptitle">Atividade dos usuários</div><div class="psub">Histórico de ações por membro da equipe</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;" id="ativ-metrics"></div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;">
+      <div class="ctitle">Registros por usuário</div>
+      <select id="ativ-filtro" onchange="renderAtividade()" style="font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);">
+        <option value="">Todos os usuários</option>
+        <option value="Alana">Alana</option>
+        <option value="Maxson">Maxson</option>
+        <option value="Victoria">Victoria</option>
+        <option value="Felipe">Felipe</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;min-width:700px;">
+        <thead><tr>
+          <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Atendimento</th>
+          <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Procedimento</th>
+          <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Data</th>
+          <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Criado por</th>
+          <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Prevenção por</th>
+          <th style="font-size:11px;font-family:var(--font-d);letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Auditoria por</th>
+        </tr></thead>
+        <tbody id="ativ-tbody"><tr><td colspan="6" class="empty">Nenhum registro.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 </main>
 </div>
 <div class="ov" id="modal" onclick="fechaMod(event)">
@@ -1042,15 +1097,55 @@ function fazerLogout() {
   auth.signOut();
 }
 
+/* =========================================================
+   USUÁRIOS — MAPA DE NOMES E PERFIS
+   ========================================================= */
+var USUARIOS = {
+  'alana@ccih.com.br':    { nome: 'Alana',    admin: true  },
+  'maxson@ccih.com.br':   { nome: 'Maxson',   admin: false },
+  'victoria@ccih.com.br': { nome: 'Victoria', admin: false },
+  'felipe@ccih.com.br':   { nome: 'Felipe',   admin: false },
+  'ccih@ccih.com.br':     { nome: 'CCIH',     admin: true  }
+};
+
+var _usuarioAtual = null; // { email, nome, admin }
+
+function getNomeUsuario(email) {
+  if (!email) return 'Desconhecido';
+  var u = USUARIOS[email.toLowerCase()];
+  return u ? u.nome : email.split('@')[0];
+}
+
+function isAdmin() {
+  return _usuarioAtual && _usuarioAtual.admin === true;
+}
+
 auth.onAuthStateChanged(function(user) {
   var tela = document.getElementById('login-tela');
   if (user) {
+    // Identifica o usuário logado
+    var email = (user.email || '').toLowerCase();
+    var info  = USUARIOS[email] || { nome: email.split('@')[0], admin: false };
+    _usuarioAtual = { email: email, nome: info.nome, admin: info.admin };
+
     tela.style.display = 'none';
     document.getElementById('login-email').value = '';
     document.getElementById('login-senha').value = '';
+
+    // Mostra nome do usuário no header
+    var userEl = document.getElementById('header-usuario');
+    if (userEl) {
+      userEl.textContent = _usuarioAtual.nome;
+      userEl.style.display = 'inline';
+    }
+
+    // Mostra painel admin se for administrador
+    var adminNav = document.getElementById('nav-admin');
+    if (adminNav) adminNav.style.display = isAdmin() ? 'block' : 'none';
+
     ativarSincronizacaoTempoReal();
   } else {
-    // Desliga o listener e polling ao fazer logout
+    _usuarioAtual = null;
     db.ref(DB_REF).off();
     if (_pollingTimer) { clearInterval(_pollingTimer); _pollingTimer = null; }
     tela.style.display = 'flex';
@@ -1202,7 +1297,7 @@ var TAB_FNS={
   antibioticos:function(){renderAbs();},anestesistas:function(){renderAnests();},
   nova:function(){popNova();},prevencao:function(){popPrevencao();},
   auditoria:function(){popAuditoria();},isc:function(){renderISC();},
-  taxaisc:function(){renderTaxaISC();},
+  taxaisc:function(){renderTaxaISC();},atividade:function(){renderAtividade();},
   graficos:function(){setTimeout(function(){renderCharts();},80);}
 };
 function showTab(id,btn){
@@ -1231,32 +1326,58 @@ var PREV_CAMPOS = [
   { id:'preparo_colorretal',label:'Preparo ATM do colorretal', temNaoAv: false, temNA: true,  somenteEquipe: 'SAD' }
 ];
 
-function isCompleto(s) {
-  // 1 — Dados básicos da solicitação
-  if (!s.atendimento && !s.prontuario) return false;
-  if (!s.procedimento) return false;
-  if (!s.solicitante)  return false;
-  if (!s.dataCirurgia && !s.data) return false;
-
-  // 2 — Medidas de prevenção (todos os campos aplicáveis)
+function isPrevencaoCompleta(s) {
   if (!s.prevencao) return false;
   var eq = (s.equipeNome || '').toUpperCase();
   for (var i = 0; i < PREV_CAMPOS.length; i++) {
     var c = PREV_CAMPOS[i];
     // Pula campos condicionais de outra equipe
     if (c.somenteEquipe && eq.indexOf(c.somenteEquipe) === -1) continue;
-    if (!s.prevencao[c.id]) return false;
+    var val = s.prevencao[c.id];
+    // Campo não preenchido = string vazia, null, undefined ou ausente
+    if (!val || val === '') return false;
   }
+  return true;
+}
 
+function isCompleto(s) {
+  // 1 — Dados básicos da solicitação
+  if (!s.atendimento && !s.prontuario) return false;
+  if (!s.procedimento) return false;
+  if (!s.solicitante)  return false;
+  if (!s.dataCirurgia && !s.data) return false;
+  // 2 — Medidas de prevenção
+  if (!isPrevencaoCompleta(s)) return false;
   // 3 — Auditoria de antibióticos
   if (!s.auditoria || !s.auditoria.classificacao) return false;
-
   return true;
+}
+
+function camposFaltando(s) {
+  var faltam = [];
+  if (!s.atendimento && !s.prontuario) faltam.push('Atendimento');
+  if (!s.procedimento) faltam.push('Procedimento');
+  if (!s.solicitante)  faltam.push('Médico');
+  if (!s.dataCirurgia && !s.data) faltam.push('Data da cirurgia');
+  if (!s.prevencao) {
+    faltam.push('Medidas de prevenção (nenhuma preenchida)');
+  } else {
+    var eq = (s.equipeNome || '').toUpperCase();
+    for (var i = 0; i < PREV_CAMPOS.length; i++) {
+      var c = PREV_CAMPOS[i];
+      if (c.somenteEquipe && eq.indexOf(c.somenteEquipe) === -1) continue;
+      if (!s.prevencao[c.id]) faltam.push('Prevenção: ' + c.label);
+    }
+  }
+  if (!s.auditoria || !s.auditoria.classificacao) faltam.push('Auditoria de antibióticos');
+  return faltam;
 }
 
 function badgeComp(s) {
   if (isCompleto(s)) return '<span class="badge-comp completo">✓ Completo</span>';
-  return '<span class="badge-comp parcial">⚠ Parcial</span>';
+  var faltam = camposFaltando(s);
+  var tip = faltam.length ? ' title="Faltando: ' + faltam.join(', ') + '"' : '';
+  return '<span class="badge-comp parcial"' + tip + '>⚠ Parcial</span>';
 }
 
 function popPrevencao() {
@@ -1274,18 +1395,7 @@ function popPrevencao() {
   var semPrev = 0;
   for (var i = 0; i < lista.length; i++) {
     var s = lista[i];
-    // Verifica se prevenção está completa para este registro
-    var eq = (s.equipeNome || '').toUpperCase();
-    var prevCompleta = !!s.prevencao;
-    if (prevCompleta) {
-      for (var j = 0; j < PREV_CAMPOS.length; j++) {
-        var c = PREV_CAMPOS[j];
-        if (c.somenteEquipe && eq.indexOf(c.somenteEquipe) === -1) continue;
-        if (!s.prevencao[c.id]) { prevCompleta = false; break; }
-      }
-    }
-    // Mostra apenas registros SEM prevenção completa
-    if (prevCompleta) continue;
+    if (isPrevencaoCompleta(s)) continue;
     semPrev++;
     sel.innerHTML += '<option value="' + s.id + '"' + (s.id == curVal ? ' selected' : '') + '>' +
       (s.iniciais ? s.iniciais + ' · ' : '') +
@@ -1294,9 +1404,13 @@ function popPrevencao() {
       (s.equipeNome ? ' · ' + s.equipeNome : '') +
     '</option>';
   }
-  if (!semPrev) {
-    sel.innerHTML = '<option value="">✓ Todos os registros já têm medidas de prevenção!</option>';
+  if (!sols.length) {
+    sel.innerHTML = '<option value="">Nenhuma solicitação cadastrada.</option>';
+  } else if (!semPrev) {
+    sel.innerHTML = '<option value="">✓ Todas as cirurgias já foram classificadas</option>';
   }
+  var todasOkEl = document.getElementById('prev-todas-ok');
+  if (todasOkEl) todasOkEl.style.display = (!semPrev && sols.length) ? 'block' : 'none';
   // Esconde o formulário ao recarregar lista
   document.getElementById('prev-form-card').style.display = 'none';
   document.getElementById('prev-info').style.display = 'none';
@@ -1381,6 +1495,7 @@ function salvarPrevencao() {
     else if (btnNA    && btnNA.className.indexOf('nav')     !== -1) { prev[c.id] = 'na'; }
   }
   sols[idx].prevencao = prev;
+  sols[idx].prevencaoPreenchidaPor = _usuarioAtual ? _usuarioAtual.nome : '';
   _bloqueioReRender = true;
   save();
 
@@ -1552,9 +1667,13 @@ function popAuditoria() {
         (s.equipeNome ? ' · ' + s.equipeNome : '') +
       '</option>';
     }
-    if (!semAuditoria) {
-      sel.innerHTML = '<option value="">✓ Todos os registros já foram auditados!</option>';
+    if (!sols.length) {
+      sel.innerHTML = '<option value="">Nenhuma solicitação cadastrada.</option>';
+    } else if (!semAuditoria) {
+      sel.innerHTML = '<option value="">✓ Todas as cirurgias já foram classificadas</option>';
     }
+    var auditTodasOkEl = document.getElementById('audit-todas-ok');
+    if (auditTodasOkEl) auditTodasOkEl.style.display = (!semAuditoria && sols.length) ? 'block' : 'none';
   }
   document.getElementById('audit-form-card').style.display = 'none';
   document.getElementById('audit-resumo').style.display = 'none';
@@ -1575,7 +1694,7 @@ function onAuditSelChange() {
   fi.style.display = 'block';
   fi.innerHTML = '<strong>' + (s.iniciais ? s.iniciais + ' · ' : '') + (s.atendimento||s.prontuario||'') + '</strong>' +
     (s.procedimento ? ' · ' + s.procedimento : '') +
-    (s.antibiotico ? ' · ' + s.antibiotico : ' · Sem antibiótico') +
+    (s.antibiotico==='__nao_utilizado__' ? ' · Não utilizado' : s.antibiotico ? ' · ' + s.antibiotico : ' · Sem antibiótico') +
     ' · ' + fmtDate(s.dataCirurgia||s.data);
   fr.style.display = 'none';
   fc.style.display = 'block';
@@ -1632,7 +1751,7 @@ function salvarAuditoria() {
   for (var i = 0; i < sols.length; i++) if (String(sols[i].id) === String(id)) { idx = i; break; }
   if (idx === -1) { alert2('audit-alert','Registro não encontrado.','er'); return; }
   var obs = document.getElementById('audit-obs').value.trim();
-  sols[idx].auditoria = { classificacao: classificacao, obs: obs, auditadoEm: new Date().toISOString() };
+  sols[idx].auditoria = { classificacao: classificacao, obs: obs, auditadoPor: _usuarioAtual ? _usuarioAtual.nome : '', auditadoEm: new Date().toISOString() };
   _bloqueioReRender = true; // impede Firebase de desfazer o estado visual
   save();
 
@@ -2127,6 +2246,74 @@ function badgeTaxaISC(taxa, equipe) {
   return '<span style="background:var(--surface2);color:var(--text3);border-radius:4px;font-size:11px;padding:2px 8px;">—</span>';
 }
 
+/* =========================================================
+   ATIVIDADE DOS USUÁRIOS (somente Admin)
+   ========================================================= */
+function renderAtividade() {
+  if (!isAdmin()) return;
+  var filtro = (document.getElementById('ativ-filtro')||{value:''}).value;
+
+  // Métricas por usuário
+  var contadores = {};
+  var nomes = ['Alana','Maxson','Victoria','Felipe'];
+  nomes.forEach(function(n){ contadores[n] = {sols:0, prev:0, audit:0}; });
+
+  for (var i = 0; i < sols.length; i++) {
+    var s = sols[i];
+    if (s.registradoPor && contadores[s.registradoPor]) contadores[s.registradoPor].sols++;
+    if (s.prevencaoPreenchidaPor && contadores[s.prevencaoPreenchidaPor]) contadores[s.prevencaoPreenchidaPor].prev++;
+    if (s.auditoria && s.auditoria.auditadoPor && contadores[s.auditoria.auditadoPor]) contadores[s.auditoria.auditadoPor].audit++;
+  }
+
+  var cores = { Alana:'#1a3a6b', Maxson:'#2d6a2d', Victoria:'#7c3aed', Felipe:'#ba7500' };
+  var metEl = document.getElementById('ativ-metrics');
+  if (metEl) {
+    metEl.innerHTML = nomes.map(function(n){
+      var c = contadores[n] || {sols:0,prev:0,audit:0};
+      var cor = cores[n] || 'var(--text)';
+      return '<div class="metric" style="border-left:3px solid '+cor+';">' +
+        '<div class="mlabel" style="color:'+cor+';font-weight:600;">'+n+'</div>' +
+        '<div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.8;">' +
+          c.sols  + ' solicitaç' + (c.sols!==1?'ões':'ão') + ' criadas<br>' +
+          c.prev  + ' prevenç' + (c.prev!==1?'ões':'ão') + ' preenchidas<br>' +
+          c.audit + ' auditoria' + (c.audit!==1?'s':'') + ' realizadas' +
+        '</div></div>';
+    }).join('');
+  }
+
+  // Tabela
+  var lista = sols.slice().sort(function(a,b){
+    var da=a.dataCirurgia||a.data||''; var db2=b.dataCirurgia||b.data||'';
+    return db2.localeCompare(da);
+  }).filter(function(s){
+    if (!filtro) return true;
+    return s.registradoPor===filtro || s.prevencaoPreenchidaPor===filtro || (s.auditoria&&s.auditoria.auditadoPor===filtro);
+  });
+
+  var tb = document.getElementById('ativ-tbody');
+  if (!lista.length) { tb.innerHTML='<tr><td colspan="6" class="empty">Nenhum registro encontrado.</td></tr>'; return; }
+
+  tb.innerHTML = lista.map(function(s){
+    var d = s.dataCirurgia||(s.data?s.data.slice(0,10):'');
+    var criado = s.registradoPor || '<span style="color:var(--text3);font-style:italic;">—</span>';
+    var prev   = s.prevencaoPreenchidaPor || '<span style="color:var(--text3);font-style:italic;">—</span>';
+    var audit  = (s.auditoria&&s.auditoria.auditadoPor) || '<span style="color:var(--text3);font-style:italic;">—</span>';
+    function userBadge(nome) {
+      if (!nome || nome.indexOf('<') !== -1) return nome;
+      var cor = cores[nome] || 'var(--text2)';
+      return '<span style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;font-size:11px;font-family:var(--font-d);padding:2px 8px;color:'+cor+';font-weight:500;">'+nome+'</span>';
+    }
+    return '<tr>' +
+      '<td style="font-family:var(--font-d);font-size:12px;padding:9px 10px;">'+(s.atendimento||s.prontuario||'—')+'</td>' +
+      '<td style="font-size:12px;padding:9px 10px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(s.procedimento||'—')+'</td>' +
+      '<td style="font-family:var(--font-d);font-size:12px;padding:9px 10px;">'+fmtDate(d)+'</td>' +
+      '<td style="padding:9px 10px;">'+userBadge(criado)+'</td>' +
+      '<td style="padding:9px 10px;">'+userBadge(prev)+'</td>' +
+      '<td style="padding:9px 10px;">'+userBadge(audit)+'</td>' +
+    '</tr>';
+  }).join('');
+}
+
 function badge(s){return'<span class="badge '+s+'">'+s.charAt(0).toUpperCase()+s.slice(1)+'</span>';}
 function ini(n){if(!n)return'?';var p=n.split(' '),r='',i;for(i=0;i<Math.min(2,p.length);i++)if(p[i])r+=p[i][0].toUpperCase();return r||'?';}
 function alert2(elId,msg,tipo){var e=document.getElementById(elId);if(!e)return;e.className='alert '+tipo+' on';e.textContent=msg;setTimeout(function(){e.classList.remove('on');},2800);}
@@ -2273,19 +2460,70 @@ function salvarMed() {
   if (!g('mn')) { alert2('med-alert','Informe o nome do médico.','er'); return; }
   var id = g('mid');
   var d = { nome:g('mn'), obs:g('mob'), equipes:getEqsChecked() };
-  var i;
+  var i, eqAnterior = null;
   if (id) {
-    for (i = 0; i < meds.length; i++) if (meds[i].id === id) { Object.assign(meds[i], d); break; }
+    for (i = 0; i < meds.length; i++) {
+      if (meds[i].id === id) {
+        eqAnterior = (meds[i].equipes||[]).join(', ');
+        Object.assign(meds[i], d);
+        break;
+      }
+    }
     selMed = id;
   } else {
     var nid = 'm' + Date.now();
     d.id = nid; meds.push(d); selMed = nid;
   }
-  save(); alert2('med-alert','Médico salvo!','ok');
+  save();
+  // Recalcula equipes automaticamente se a equipe do médico mudou
+  var eqNova = (d.equipes||[]).join(', ');
+  var qtd = 0;
+  if (id && eqAnterior !== null && eqAnterior !== eqNova) {
+    qtd = _recalcularEquipesInterno();
+    if (qtd > 0) {
+      alert2('med-alert', 'Médico salvo! ' + qtd + ' registro(s) atualizado(s) automaticamente com a nova equipe.', 'ok');
+    } else {
+      alert2('med-alert','Médico salvo!','ok');
+    }
+  } else {
+    alert2('med-alert','Médico salvo!','ok');
+  }
   document.getElementById('med-form').style.display = 'none';
   document.getElementById('med-det').style.display = 'block';
   document.getElementById('med-vazio').style.display = 'none';
   renderMeds(); renderDetMed();
+}
+
+function recalcularEquipes() {
+  var qtd = _recalcularEquipesInterno();
+  if (qtd === 0) {
+    alert2('med-alert','✓ Todas as equipes já estão atualizadas — nenhuma divergência encontrada.','ok');
+  } else {
+    save();
+    alert2('med-alert','✓ ' + qtd + ' registro(s) atualizado(s) com as equipes corretas dos médicos.','ok');
+  }
+}
+
+function _recalcularEquipesInterno() {
+  // Monta mapa nome → equipe atual
+  var medMap = {};
+  for (var i = 0; i < meds.length; i++) {
+    var m = meds[i];
+    if (m.nome) medMap[m.nome.trim()] = (m.equipes||[]).join(', ');
+  }
+  var qtd = 0;
+  for (var j = 0; j < sols.length; j++) {
+    var s = sols[j];
+    var nomeMed = (s.solicitante||'').trim();
+    if (!nomeMed || medMap[nomeMed] === undefined) continue;
+    var eqNova = medMap[nomeMed];
+    if ((s.equipeNome||'').trim() !== eqNova) {
+      sols[j].equipeNome = eqNova;
+      qtd++;
+    }
+  }
+  if (qtd > 0) save();
+  return qtd;
 }
 function cancelarMedForm() {
   document.getElementById('med-form').style.display = 'none';
@@ -2857,6 +3095,8 @@ function salvarSol() {
 
   sols.push({
     id: Date.now(),
+    registradoPor: _usuarioAtual ? _usuarioAtual.nome : '',
+    criadoEm: new Date().toISOString(),
     iniciais:    g('f-iniciais'),
     atendimento: g('f-pron'),
     nascimento:  g('f-nasc'),
@@ -2945,7 +3185,8 @@ function renderReg() {
   var abNms = [], eqNms = [], seen = {}, seenE = {}, i, s;
   for (i = 0; i < sols.length; i++) {
     s = sols[i];
-    if (s.antibiotico && !seen[s.antibiotico]) { abNms.push(s.antibiotico); seen[s.antibiotico]=1; }
+    var _abNorm = s.antibiotico==='__nao_utilizado__'?'Não utilizado':(s.antibiotico||'');
+    if (_abNorm && !seen[_abNorm]) { abNms.push(_abNorm); seen[_abNorm]=1; }
     if (s.equipeNome  && !seenE[s.equipeNome]) { eqNms.push(s.equipeNome);  seenE[s.equipeNome]=1; }
   }
   var selA = document.getElementById('fr-ab'), curA = selA.value;
@@ -2961,7 +3202,8 @@ function renderReg() {
   for (i = sols.length-1; i >= 0; i--) {
     s = sols[i];
     d = s.dataCirurgia || (s.data ? s.data.slice(0,10) : '');
-    if (fA && s.antibiotico !== fA) continue;
+    var _abFilt = s.antibiotico==='__nao_utilizado__'?'Não utilizado':(s.antibiotico||'');
+    if (fA && _abFilt !== fA) continue;
     if (fE && s.equipeNome  !== fE) continue;
     if (fD  && d && d < fD)  continue;
     if (fAt && d && d > fAt) continue;
@@ -3134,7 +3376,7 @@ function renderCharts() {
   var abC={}, dC={}, eC={};
   for (i=0;i<sols.length;i++){
     s=sols[i];
-    if(s.antibiotico) abC[s.antibiotico]=(abC[s.antibiotico]||0)+1;
+    var _ab=(s.antibiotico==='__nao_utilizado__'?'Não utilizado':(s.antibiotico||'')); if(_ab) abC[_ab]=(abC[_ab]||0)+1;
     d=s.dataCirurgia||(s.data?s.data.slice(0,10):null); if(d) dC[d]=(dC[d]||0)+1;
   }
   var abK = Object.keys(abC).sort(function(a,b){return abC[b]-abC[a];}).slice(0,6);
@@ -3257,9 +3499,15 @@ function editarSol(idx) {
   if (bEl) bEl.value = s.procedimento || '';
   if (hEl) hEl.value = s.procedimento || '';
   set('f-nasc',    s.nascimento);
-  set('f-idade',   s.idade);
   set('f-genero',  s.genero);
   set('f-peso',    s.peso);
+  // Recalcula idade ao editar (f-nasc não dispara oninput automaticamente)
+  if (s.nascimento) {
+    var nascEl = document.getElementById('f-nasc');
+    if (nascEl) { nascEl.value = s.nascimento; calcIdade(); }
+  } else {
+    set('f-idade', s.idade); // usa o valor salvo se não há nascimento
+  }
   set('f-proc',    s.procedimento);
   set('f-data-d',  s.dataCirurgia);
   set('f-data-h',  s.horaCirurgia);
@@ -3326,13 +3574,15 @@ function atualizarSol() {
   var todasNaoUtil2 = linhasSalvas.length > 0 && linhasSalvas.every(function(x){ return x.antibioticoId==='__nao_utilizado__'; });
   var abNomeStr = todasNaoUtil2 ? 'Não utilizado' : linhasSalvas.filter(function(x){ return x.antibioticoId!=='__nao_utilizado__'; }).map(function(x){return x.antibiotico;}).join(' + ');
   // Preserva o id e criadoEm originais, e dados de isc/auditoria/prevencao
-  var idOrig   = sols[_editIdx].id;
-  var criadoEm = sols[_editIdx].criadoEm;
-  var iscOrig  = sols[_editIdx] ? sols[_editIdx].isc       : null;
+  var idOrig      = sols[_editIdx].id;
+  var criadoEm    = sols[_editIdx].criadoEm;
+  var iscOrig     = sols[_editIdx].isc       || null;
+  var auditoriaOrig = sols[_editIdx].auditoria || null;
+  var prevencaoOrig = sols[_editIdx].prevencao  || null;
   sols[_editIdx] = {
     id:idOrig, criadoEm:criadoEm, editadoEm:new Date().toISOString(),
-    auditoria: sols[_editIdx] ? sols[_editIdx].auditoria : null,
-    prevencao:  sols[_editIdx] ? sols[_editIdx].prevencao  : null,
+    auditoria:  auditoriaOrig,
+    prevencao:  prevencaoOrig,
     isc:        iscOrig,
     iniciais:    g('f-iniciais'),
     atendimento: g('f-pron'), nascimento:g('f-nasc'), idade:g('f-idade'),
@@ -3489,7 +3739,7 @@ function renderCharts() {
   var abC={}, dC={};
   for (i=0;i<sols.length;i++){
     s=sols[i];
-    if(s.antibiotico) abC[s.antibiotico]=(abC[s.antibiotico]||0)+1;
+    var _ab=(s.antibiotico==='__nao_utilizado__'?'Não utilizado':(s.antibiotico||'')); if(_ab) abC[_ab]=(abC[_ab]||0)+1;
     d=s.dataCirurgia||(s.data?s.data.slice(0,10):null); if(d) dC[d]=(dC[d]||0)+1;
   }
   var abK = Object.keys(abC).sort(function(a,b){return abC[b]-abC[a];}).slice(0,6);
