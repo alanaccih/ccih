@@ -327,6 +327,9 @@ textarea{resize:vertical;min-height:72px;}
     <button class="nitem" onclick="showTab('taxaisc',this)">
       <svg viewBox="0 0 14 14" fill="none"><path d="M1 11L4 7l3 2 3-5 2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 13h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M10 3h3v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Taxa de ISC
     </button>
+    <button class="nitem" onclick="showTab('importarpdf',this)">
+      <svg viewBox="0 0 14 14" fill="none"><path d="M2 10V12h10V10M7 1v8M4 6l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Importar do hospital
+    </button>
     <button class="nitem" onclick="showTab('registros',this)">
       <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M4 5h6M4 7.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Todos os registros
     </button>
@@ -1041,6 +1044,70 @@ textarea{resize:vertical;min-height:72px;}
   </div>
 </div>
 
+<!-- IMPORTAR DO HOSPITAL -->
+<div class="section" id="tab-importarpdf">
+  <div class="phdr">
+    <div><div class="ptitle">Importar do hospital</div><div class="psub">Carregue o arquivo Excel do sistema ACCG para criar solicitações automaticamente</div></div>
+  </div>
+  <div id="import-pdf-alert" class="alert"></div>
+
+  <!-- Upload único -->
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="ctitle" style="margin-bottom:.5rem;">Arquivo de Auditoria ATB</div>
+    <div style="font-size:11px;color:var(--text3);font-family:var(--font-d);margin-bottom:1rem;">
+      Formato: <strong>.xls</strong> exportado pelo ACCG — colunas: Nº atend., Paciente, Dt Nasc, Sexo, Peso/Kg, Cirurgião, Anestesista, Procedimento, Dt cirurgia, Hora/infusão, Inicio, Fim, Antibióticos
+    </div>
+    <label id="label-xls" style="display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:var(--r);padding:2rem;cursor:pointer;gap:10px;transition:all .15s;background:var(--surface2);max-width:440px;">
+      <svg viewBox="0 0 24 24" fill="none" style="width:36px;height:36px;color:var(--text3);"><path d="M12 15V3M8 11l4 4 4-4M3 18v1a2 2 0 002 2h14a2 2 0 002-2v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="nome-xls" style="font-size:13px;color:var(--text3);font-family:var(--font-d);">Clique para selecionar o arquivo .xls</span>
+      <input type="file" id="input-xls" accept=".xls,.xlsx,.tsv,.csv" style="display:none;" onchange="onXlsChange(this)">
+    </label>
+  </div>
+
+  <!-- Preview -->
+  <div id="pdf-preview" style="display:none;">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div class="ctitle">Registros extraídos</div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--font-d);margin-top:3px;" id="pdf-preview-sub"></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" onclick="desmarcarTodos()">Desmarcar todos</button>
+          <button class="btn pri" onclick="importarSelecionados()" id="btn-importar-sel">✓ Importar selecionados</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;min-width:900px;">
+          <thead><tr>
+            <th style="font-size:11px;font-family:var(--font-d);color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);width:36px;"><input type="checkbox" id="check-todos" onchange="toggleTodos(this)" style="cursor:pointer;"></th>
+            <th style="font-size:11px;font-family:var(--font-d);color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Atend.</th>
+            <th style="font-size:11px;font-family:var(--font-d);color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Paciente</th>
+            <th style="font-size:11px;font-family:var(--font-d);color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Procedimento</th>
+            <th style="font-size:11px;font-family:var(--font-d);color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Cirurgião</th>
+            <th style="font-size:11px;font-family:var(--font-d);color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Data</th>
+            <th style="font-size:11px;font-family:var(--font-d);color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">H.Infusão</th>
+            <th style="font-size:11px;font-family:var(--font-d);color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Antibiótico</th>
+            <th style="font-size:11px;font-family:var(--font-d);color:var(--text3);text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);">Status</th>
+          </tr></thead>
+          <tbody id="pdf-preview-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Painel desfazer -->
+  <div id="painel-desfazer" style="display:none;">
+    <div class="card" style="margin-top:1rem;">
+      <div style="margin-bottom:1rem;">
+        <div class="ctitle">Importações realizadas</div>
+        <div style="font-size:11px;color:var(--text3);font-family:var(--font-d);margin-top:3px;">Clique em "Desfazer" para remover todos os registros de uma importação</div>
+      </div>
+      <div id="desfazer-lista"></div>
+    </div>
+  </div>
+</div>
+
 </main>
 </div>
 <div class="ov" id="modal" onclick="fechaMod(event)">
@@ -1298,6 +1365,7 @@ var TAB_FNS={
   nova:function(){popNova();},prevencao:function(){popPrevencao();},
   auditoria:function(){popAuditoria();},isc:function(){renderISC();},
   taxaisc:function(){renderTaxaISC();},atividade:function(){renderAtividade();},
+  importarpdf:function(){ renderDesfazerImportacoes(); },
   graficos:function(){setTimeout(function(){renderCharts();},80);}
 };
 function showTab(id,btn){
@@ -2051,6 +2119,180 @@ function toggleISC(idx) {
   sols[idx].isc = { confirmado: true, obs: '', tipo: '', origem: '', gravidade: '', registradoEm: new Date().toISOString() };
   save();
   renderISC();
+}
+
+
+/* =========================================================
+   IMPORTAÇÃO DE XLS DO HOSPITAL (leitura direta, sem API)
+   ========================================================= */
+var _registrosExtraidos = [];
+
+function onXlsChange(input) {
+  var file = input.files[0]; if (!file) return;
+  var label = document.getElementById('label-xls');
+  var nomeEl = document.getElementById('nome-xls');
+  nomeEl.textContent = '⏳ Lendo ' + file.name + '...';
+  nomeEl.style.color = 'var(--amber)';
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var texto = '';
+      // Tenta decodificar como ISO-8859-1 (padrão do ACCG)
+      var bytes = new Uint8Array(e.target.result);
+      for (var i = 0; i < bytes.length; i++) texto += String.fromCharCode(bytes[i]);
+      var linhas = texto.split(/?
+/).filter(function(l){ return l.trim(); });
+      if (!linhas.length) throw new Error('Arquivo vazio');
+
+      // Detecta separador (tab ou ;)
+      var sep = linhas[0].indexOf('	') !== -1 ? '	' : ';';
+      var cabecalho = linhas[0].split(sep).map(function(c){ return c.trim(); });
+
+      // Mapeia colunas pelos nomes (tolerante a variações)
+      function col(nome) {
+        for (var ci = 0; ci < cabecalho.length; ci++) {
+          if (cabecalho[ci].toLowerCase().replace(/[^a-z0-9]/g,'').indexOf(nome.toLowerCase().replace(/[^a-z0-9]/g,'')) !== -1) return ci;
+        }
+        return -1;
+      }
+      var iAtend  = col('atend');
+      var iPac    = col('paciente');
+      var iNasc   = col('nasc') !== -1 ? col('nasc') : col('dtnasc');
+      var iSexo   = col('sexo');
+      var iPeso   = col('peso');
+      var iCir    = col('cirurgi');
+      var iAnest  = col('aneste');
+      var iProc   = col('procedimento');
+      var iDtCir  = col('dtcirurgia') !== -1 ? col('dtcirurgia') : col('cirurgia');
+      var iHInf   = col('infus');
+      var iInicio = col('inicio');
+      var iFim    = col('fim');
+      var iAtb    = col('antibio');
+
+      if (iAtend === -1) throw new Error('Coluna "Nº atend." não encontrada. Verifique se o arquivo é o correto.');
+
+      _registrosExtraidos = [];
+      for (var j = 1; j < linhas.length; j++) {
+        var cols = linhas[j].split(sep);
+        if (!cols[iAtend] || !cols[iAtend].trim()) continue;
+
+        // Limpa procedimento (remove vírgulas e 
+ iniciais)
+        var proc = iProc !== -1 ? (cols[iProc]||'').replace(/^[,\s]+/,'').replace(/\n/g,' / ').trim() : '';
+        // Limpa ATB
+        var atb = iAtb !== -1 ? (cols[iAtb]||'').replace(/^[-\s]+/,'').trim() : '';
+        // Normaliza nome do ATB para padrão do sistema
+        atb = normalizarAtb(atb);
+
+        _registrosExtraidos.push({
+          atendimento: (cols[iAtend]||'').trim(),
+          paciente:    iPac    !== -1 ? (cols[iPac]||'').trim()    : '',
+          dtNasc:      iNasc   !== -1 ? (cols[iNasc]||'').trim()   : '',
+          sexo:        iSexo   !== -1 ? (cols[iSexo]||'').trim()   : '',
+          peso:        iPeso   !== -1 ? (cols[iPeso]||'').replace(',','.').trim() : '',
+          cirurgiao:   iCir    !== -1 ? (cols[iCir]||'').trim()    : '',
+          anestesista: iAnest  !== -1 ? (cols[iAnest]||'').trim()  : '',
+          procedimento: proc,
+          dtCirurgia:  iDtCir  !== -1 ? (cols[iDtCir]||'').trim() : '',
+          horaInfusao: iHInf   !== -1 ? (cols[iHInf]||'').trim()  : '',
+          horaInicio:  iInicio !== -1 ? (cols[iInicio]||'').trim() : '',
+          horaFim:     iFim    !== -1 ? (cols[iFim]||'').trim()    : '',
+          antibiotico: atb
+        });
+      }
+
+      nomeEl.textContent = '✓ ' + file.name + ' — ' + _registrosExtraidos.length + ' registro(s)';
+      nomeEl.style.color = 'var(--green)';
+      label.style.borderColor = 'var(--green)';
+      label.style.background  = 'var(--green-bg)';
+      renderPreviewPDF();
+    } catch(err) {
+      nomeEl.textContent = '✗ Erro: ' + err.message;
+      nomeEl.style.color = 'var(--red)';
+      label.style.borderColor = 'var(--red)';
+      label.style.background  = 'var(--red-bg)';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function normalizarAtb(raw) {
+  if (!raw || !raw.trim()) return '';
+  var s = raw.trim();
+  // Remove prefixo "- " 
+  s = s.replace(/^-\s*/,'');
+  // Cefazolina 1gr → Cefazolina 1g
+  s = s.replace(/(\d+)\s*gr/gi, '$1g');
+  // Remove dose entre parênteses ex: "(dose = 2000)"
+  s = s.replace(/\s*\(dose\s*=\s*[\d\s]+\)/gi,'').trim();
+  // Normaliza espaços
+  s = s.replace(/\s+/g,' ').trim();
+  // Capitaliza primeira letra
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/* =========================================================
+   DESFAZER IMPORTAÇÃO DE PDFs
+   ========================================================= */
+function renderDesfazerImportacoes() {
+  var painel = document.getElementById('painel-desfazer');
+  var lista  = document.getElementById('desfazer-lista');
+  if (!painel || !lista) return;
+
+  // Agrupa registros importados por data+hora (ao minuto)
+  var grupos = {};
+  for (var i = 0; i < sols.length; i++) {
+    var s = sols[i];
+    if (!s.importadoDePDF || !s.importadoEm) continue;
+    var ts = s.importadoEm.slice(0, 16); // 'YYYY-MM-DDTHH:MM'
+    if (!grupos[ts]) grupos[ts] = { ts: ts, ids: [], qtd: 0 };
+    grupos[ts].ids.push(s.id);
+    grupos[ts].qtd++;
+  }
+
+  var chaves = Object.keys(grupos).sort().reverse();
+
+  if (!chaves.length) {
+    painel.style.display = 'none';
+    return;
+  }
+
+  painel.style.display = 'block';
+  var html = '';
+  for (var j = 0; j < chaves.length; j++) {
+    var g   = grupos[chaves[j]];
+    var dt  = new Date(g.ts + ':00');
+    var dtStr = dt.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' }) +
+                ' às ' + dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    html +=
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;' +
+        'border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;background:var(--surface);">' +
+        '<div>' +
+          '<div style="font-size:13px;font-weight:500;color:var(--text);">Importação de ' + dtStr + '</div>' +
+          '<div style="font-size:11px;color:var(--text3);font-family:var(--font-d);margin-top:3px;">' + g.qtd + ' registro(s)</div>' +
+        '</div>' +
+        '<button onclick="desfazerImportacao(\'' + g.ts + '\')" ' +
+          'style="padding:6px 14px;font-size:12px;font-family:var(--font-b);border:1px solid #f0c0c0;' +
+          'border-radius:var(--r);background:#fff;color:var(--red);cursor:pointer;white-space:nowrap;">' +
+          '✕ Desfazer' +
+        '</button>' +
+      '</div>';
+  }
+  lista.innerHTML = html;
+}
+
+function desfazerImportacao(ts) {
+  var lista = sols.filter(function(s){ return s.importadoDePDF && s.importadoEm && s.importadoEm.slice(0,16) === ts; });
+  if (!lista.length) return;
+  var ats = lista.map(function(s){ return s.atendimento||s.id; });
+  if (!confirm('Remover ' + lista.length + ' registro(s) desta importação?\n\nAtendimentos: ' +
+    ats.slice(0,10).join(', ') + (ats.length>10 ? ' e mais '+(ats.length-10)+'...' : '') +
+    '\n\nEsta ação não pode ser desfeita.')) return;
+  sols = sols.filter(function(s){ return !(s.importadoDePDF && s.importadoEm && s.importadoEm.slice(0,16) === ts); });
+  save();
+  alert2('import-pdf-alert', '✓ ' + lista.length + ' registro(s) removido(s).', 'ok');
+  renderDesfazerImportacoes();
 }
 
 /* =========================================================
