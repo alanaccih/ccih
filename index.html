@@ -2254,6 +2254,222 @@ function normalizarAtb(raw) {
 }
 
 /* =========================================================
+   PREVIEW E IMPORTACAO — FUNCOES AUXILIARES
+   ========================================================= */
+function getStatusPDF(r) {
+  var temAb   = r.antibiotico && r.antibiotico.trim() !== '';
+  var temHora = r.horaInfusao && r.horaInfusao.trim() !== '';
+  if (!temAb && !temHora) return { tipo:'nao_utilizado', msg:'Sem ATB e sem horario — marcado como Nao utilizado', cor:'var(--text3)', bg:'var(--surface2)' };
+  if ( temAb &&  temHora) return { tipo:'ok',            msg:'', cor:'', bg:'' };
+  if ( temAb && !temHora) return { tipo:'erro', msg:'Tem antibiotico mas sem horario de infusao — corrigir antes de importar', cor:'var(--red)', bg:'var(--red-bg)' };
+  return { tipo:'erro', msg:'Tem horario de infusao mas sem antibiotico — corrigir antes de importar', cor:'var(--red)', bg:'var(--red-bg)' };
+}
+
+function renderPreviewPDF() {
+  var preview = document.getElementById('pdf-preview');
+  var tbody   = document.getElementById('pdf-preview-tbody');
+  var sub     = document.getElementById('pdf-preview-sub');
+  if (!preview || !tbody) return;
+  preview.style.display = 'block';
+
+  var atendExist = {};
+  for (var i = 0; i < sols.length; i++) {
+    var at = sols[i].atendimento || sols[i].prontuario || '';
+    if (at) atendExist[String(at).trim()] = true;
+  }
+
+  var novos = 0, existentes = 0, erros = 0, naoUtil = 0;
+  var html = '';
+
+  for (var j = 0; j < _registrosExtraidos.length; j++) {
+    var r = _registrosExtraidos[j];
+    var jaExiste = !!atendExist[String(r.atendimento||'').trim()];
+    if (jaExiste) existentes++; else novos++;
+
+    var st = getStatusPDF(r);
+    if (st.tipo === 'erro')         erros++;
+    if (st.tipo === 'nao_utilizado') naoUtil++;
+
+    var alertas = [];
+    if (!r.cirurgiao || !r.cirurgiao.trim()) {
+      alertas.push('Sem cirurgiao');
+    } else {
+      var medOk = false;
+      for (var m = 0; m < meds.length; m++) {
+        if ((meds[m].nome||'').trim().toLowerCase() === r.cirurgiao.trim().toLowerCase()) { medOk = true; break; }
+      }
+      if (!medOk) alertas.push('Medico nao cadastrado — equipe ficara vazia');
+    }
+
+    var badgeSt = '';
+    if (jaExiste) {
+      badgeSt = '<span style="background:var(--surface2);color:var(--text3);border-radius:4px;font-size:10px;padding:2px 7px;font-family:var(--font-d);">Ja existe</span>';
+    } else if (st.tipo === 'erro') {
+      badgeSt = '<span style="background:var(--red-bg);color:var(--red);border-radius:4px;font-size:10px;padding:2px 7px;font-family:var(--font-d);font-weight:500;">Corrigir</span>';
+    } else if (st.tipo === 'nao_utilizado') {
+      badgeSt = '<span style="background:var(--surface2);color:var(--text2);border-radius:4px;font-size:10px;padding:2px 7px;font-family:var(--font-d);">Nao utilizado</span>';
+    } else {
+      badgeSt = '<span style="background:var(--green-bg);color:var(--green);border-radius:4px;font-size:10px;padding:2px 7px;font-family:var(--font-d);font-weight:500;">Novo</span>';
+    }
+
+    var rowBg = st.tipo==='erro' ? 'background:#fffafa;' : '';
+    var rowOp = jaExiste ? 'opacity:.5;' : '';
+    var abExib = st.tipo==='nao_utilizado' ? '<span style="color:var(--text3);font-style:italic;">Nao utilizado</span>' : (r.antibiotico||'—');
+    var horaExib = st.tipo==='nao_utilizado' ? '—' : (r.horaInfusao||'—');
+    var chkDis = (jaExiste || st.tipo==='erro') ? 'disabled' : 'checked';
+
+    html += '<tr style="'+rowBg+rowOp+'">' +
+      '<td style="padding:8px 10px;"><input type="checkbox" class="pdf-check" data-idx="'+j+'" '+chkDis+' style="cursor:pointer;"></td>' +
+      '<td style="font-family:var(--font-d);font-size:12px;padding:8px 10px;">'+r.atendimento+'</td>' +
+      '<td style="font-size:11px;padding:8px 10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+(r.paciente||'')+'">'+(r.paciente||'—')+'</td>' +
+      '<td style="font-size:11px;padding:8px 10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+(r.procedimento||'')+'">'+(r.procedimento||'—')+'</td>' +
+      '<td style="font-size:11px;padding:8px 10px;">'+(r.cirurgiao||'—')+'</td>' +
+      '<td style="font-family:var(--font-d);font-size:11px;padding:8px 10px;">'+(r.dtCirurgia||'—')+'</td>' +
+      '<td style="font-family:var(--font-d);font-size:11px;padding:8px 10px;">'+horaExib+'</td>' +
+      '<td style="font-size:11px;padding:8px 10px;">'+abExib+'</td>' +
+      '<td style="padding:8px 10px;min-width:110px;">'+badgeSt+
+        (st.msg ? '<div style="font-size:10px;color:'+st.cor+';margin-top:3px;line-height:1.4;">'+st.msg+'</div>' : '')+
+        (alertas.length ? '<div style="font-size:10px;color:var(--amber);margin-top:2px;">'+alertas.join(' · ')+'</div>' : '')+
+      '</td>' +
+    '</tr>';
+  }
+
+  tbody.innerHTML = html;
+  var resumo = _registrosExtraidos.length + ' registro(s) · ' + novos + ' novo(s) · ' + existentes + ' ja existente(s)';
+  if (naoUtil) resumo += ' · ' + naoUtil + ' Nao utilizado';
+  if (erros)   resumo += ' · <span style="color:var(--red);font-weight:500;">' + erros + ' com erro</span>';
+  sub.innerHTML = resumo;
+  document.getElementById('check-todos').checked = true;
+}
+
+function toggleTodos(cb) {
+  var checks = document.querySelectorAll('.pdf-check:not([disabled])');
+  for (var i = 0; i < checks.length; i++) checks[i].checked = cb.checked;
+}
+
+function desmarcarTodos() {
+  var ct = document.getElementById('check-todos');
+  if (ct) ct.checked = false;
+  toggleTodos({ checked: false });
+}
+
+function importarSelecionados() {
+  var checks = document.querySelectorAll('.pdf-check:checked');
+  if (!checks.length) { alert2('import-pdf-alert', 'Selecione ao menos um registro.', 'er'); return; }
+
+  var medsCadAuto = [];
+  var medsExist = meds.map(function(m){ return (m.nome||'').trim().toLowerCase(); });
+
+  var importados = 0;
+  for (var i = 0; i < checks.length; i++) {
+    var idx = parseInt(checks[i].getAttribute('data-idx'));
+    var r = _registrosExtraidos[idx];
+    if (!r) continue;
+
+    var st = getStatusPDF(r);
+    var naoUtil = st.tipo === 'nao_utilizado';
+
+    // Cadastra medico novo se nao existir
+    var medNome = (r.cirurgiao||'').trim();
+    var medEq = '';
+    if (medNome) {
+      var medIdx = medsExist.indexOf(medNome.toLowerCase());
+      if (medIdx === -1) {
+        var novoMedId = 'med_auto_' + Date.now() + '_' + i;
+        meds.push({ id: novoMedId, nome: medNome, equipes: [], obs: 'Cadastrado automaticamente via importacao' });
+        medsExist.push(medNome.toLowerCase());
+        medsCadAuto.push(medNome);
+      } else {
+        medEq = (meds[medIdx].equipes||[]).join(', ');
+      }
+    }
+
+    // Converte data dd/mm/yyyy -> yyyy-mm-dd
+    function convData(s) {
+      if (!s) return '';
+      var p = s.split('/');
+      return p.length === 3 ? p[2]+'-'+p[1]+'-'+p[0] : s;
+    }
+
+    // Idade
+    var idadeStr = '';
+    if (r.dtNasc) {
+      try {
+        var pn = r.dtNasc.split('/');
+        var dn = new Date(pn[2]+'-'+pn[1]+'-'+pn[0]+'T12:00');
+        var dc2 = r.dtCirurgia ? (function(){ var pd=r.dtCirurgia.split('/'); return new Date(pd[2]+'-'+pd[1]+'-'+pd[0]+'T12:00'); })() : new Date();
+        var anos2 = dc2.getFullYear() - dn.getFullYear();
+        var mm2 = dc2.getMonth() - dn.getMonth();
+        if (mm2 < 0 || (mm2 === 0 && dc2.getDate() < dn.getDate())) anos2--;
+        if (anos2 >= 0) idadeStr = anos2 + ' anos';
+      } catch(e2) {}
+    }
+
+    // Iniciais
+    var iniciais = '';
+    if (r.paciente) {
+      var pts = r.paciente.split(' ');
+      for (var p2 = 0; p2 < Math.min(pts.length, 3); p2++) if (pts[p2]) iniciais += pts[p2][0] + '.';
+    }
+
+    var dtCir = convData(r.dtCirurgia);
+
+    // Antibiotico
+    var abId = '__nao_utilizado__', abNome2 = 'Nao utilizado', abValorG = '';
+    if (!naoUtil && r.antibiotico) {
+      abId = ''; abNome2 = r.antibiotico;
+      for (var a = 0; a < abs.length; a++) {
+        var abCad = (abs[a].nome||'').toLowerCase().split('(')[0].trim();
+        if (abCad.length > 3 && r.antibiotico.toLowerCase().indexOf(abCad) !== -1) {
+          abId = abs[a].id; abValorG = abs[a].valor||'';
+          abNome2 = abs[a].nome + (abs[a].gramatura ? ' ' + abs[a].gramatura + 'g' : '');
+          break;
+        }
+      }
+    }
+
+    sols.push({
+      id:           Date.now() + i,
+      registradoPor: _usuarioAtual ? _usuarioAtual.nome : '',
+      importadoDePDF: true,
+      importadoEm:  new Date().toISOString(),
+      criadoEm:     new Date().toISOString(),
+      iniciais:     iniciais,
+      atendimento:  r.atendimento,
+      nascimento:   r.dtNasc ? convData(r.dtNasc) : '',
+      idade:        idadeStr,
+      genero:       r.sexo === 'M' ? 'Masculino' : r.sexo === 'F' ? 'Feminino' : '',
+      peso:         r.peso || '',
+      procedimento: r.procedimento || '',
+      equipeNome:   medEq,
+      solicitante:  medNome,
+      anestesista:  r.anestesista || '',
+      dataCirurgia: dtCir,
+      horaCirurgia: r.horaInicio || '',
+      horaFim:      r.horaFim || '',
+      data:         dtCir,
+      horaInfusao:  naoUtil ? '' : (r.horaInfusao || ''),
+      antibiotico:  abNome2,
+      antibioticos: [{ antibioticoId: abId, antibiotico: abNome2, valorG: abValorG, dose: '', total: 0 }],
+      antibioticoValor: 0,
+      obs: ''
+    });
+    importados++;
+  }
+
+  save();
+
+  var msg = importados + ' solicitacao(oes) importadas!';
+  if (medsCadAuto.length) {
+    msg += ' ' + medsCadAuto.length + ' medico(s) novo(s) cadastrado(s) sem equipe: ' + medsCadAuto.join(', ');
+  }
+  alert2('import-pdf-alert', msg, 'ok');
+  document.getElementById('pdf-preview').style.display = 'none';
+  _registrosExtraidos = [];
+  renderDesfazerImportacoes();
+}
+
+/* =========================================================
    DESFAZER IMPORTAÇÃO DE PDFs
    ========================================================= */
 function renderDesfazerImportacoes() {
