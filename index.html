@@ -6,6 +6,7 @@
 <title>CCIH — Módulo Cirúrgico</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg:#f4f3ef;--surface:#fff;--surface2:#f0efe9;--border:#dddbd3;
@@ -2121,16 +2122,15 @@ function toggleISC(idx) {
   renderISC();
 }
 
-
 /* =========================================================
-   IMPORTACAO DE XLS DO HOSPITAL
+   IMPORTACAO DE XLS/XLSX DO HOSPITAL
    ========================================================= */
 var _registrosExtraidos = [];
 
 function onXlsChange(input) {
   var file = input.files[0];
   if (!file) return;
-  var label = document.getElementById('label-xls');
+  var label  = document.getElementById('label-xls');
   var nomeEl = document.getElementById('nome-xls');
   nomeEl.textContent = 'Lendo ' + file.name + '...';
   nomeEl.style.color = 'var(--amber)';
@@ -2138,27 +2138,19 @@ function onXlsChange(input) {
   var reader = new FileReader();
   reader.onload = function(e) {
     try {
-      var bytes = new Uint8Array(e.target.result);
-      var texto = '';
-      for (var i = 0; i < bytes.length; i++) {
-        texto += String.fromCharCode(bytes[i]);
-      }
+      var data = new Uint8Array(e.target.result);
+      var wb   = XLSX.read(data, { type: 'array', cellDates: true });
+      var ws   = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, dateNF: 'dd/mm/yyyy' });
 
-      var linhas = texto.split('\n').map(function(l) {
-        return l.replace(/\r$/, '');
-      }).filter(function(l) {
-        return l.trim() !== '';
-      });
+      if (!rows || rows.length < 2) throw new Error('Arquivo vazio ou sem dados.');
 
-      if (!linhas.length) throw new Error('Arquivo vazio');
-
-      var sep = (linhas[0].indexOf('\t') !== -1) ? '\t' : ';';
-      var cabecalho = linhas[0].split(sep).map(function(c2) { return c2.trim(); });
+      var cabecalho = rows[0].map(function(c2) { return String(c2 || '').trim(); });
 
       function col(nome) {
         var nomeLower = nome.toLowerCase().replace(/[^a-z0-9]/g, '');
         for (var ci = 0; ci < cabecalho.length; ci++) {
-          var h = cabecalho[ci].toLowerCase().replace(/[^a-z0-9]/g, '');
+          var h = String(cabecalho[ci]).toLowerCase().replace(/[^a-z0-9]/g, '');
           if (h.indexOf(nomeLower) !== -1) return ci;
         }
         return -1;
@@ -2173,50 +2165,70 @@ function onXlsChange(input) {
       var iAnest  = col('aneste');
       var iProc   = col('procedimento');
       var iDtCir  = col('dtcirurgia');
-      if (iDtCir === -1) iDtCir = col('cirurgia');
+      if (iDtCir  === -1) iDtCir = col('cirurgia');
       var iHInf   = col('infus');
       var iInicio = col('inicio');
       var iFim    = col('fim');
       var iAtb    = col('antibio');
 
       if (iAtend === -1) {
-        throw new Error('Coluna de atendimento nao encontrada. Verifique o arquivo.');
+        throw new Error('Coluna de atendimento nao encontrada. Colunas detectadas: ' + cabecalho.join(', '));
+      }
+
+      function fmtVal(v) {
+        if (v === null || v === undefined) return '';
+        return String(v).trim();
+      }
+
+      function fmtData(v) {
+        if (!v) return '';
+        var s = String(v).trim();
+        // Se ja esta no formato dd/mm/yyyy retorna direto
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+        // Se esta no formato yyyy-mm-dd converte
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+          var p = s.slice(0,10).split('-');
+          return p[2] + '/' + p[1] + '/' + p[0];
+        }
+        return s;
+      }
+
+      function fmtHora(v) {
+        if (!v) return '';
+        var s = String(v).trim();
+        // HH:MM:SS -> HH:MM
+        var m = s.match(/^(\d{1,2}):(\d{2})/);
+        if (m) return m[1].padStart(2,'0') + ':' + m[2];
+        return s;
       }
 
       _registrosExtraidos = [];
-      for (var j = 1; j < linhas.length; j++) {
-        var cols = linhas[j].split(sep);
-        if (!cols[iAtend] || !cols[iAtend].trim()) continue;
+      for (var j = 1; j < rows.length; j++) {
+        var cols = rows[j];
+        if (!cols || !cols[iAtend] || !String(cols[iAtend]).trim()) continue;
 
-        var proc = '';
-        if (iProc !== -1 && cols[iProc]) {
-          proc = cols[iProc].replace(/^[,\s]+/, '').replace(/\\n/g, ' / ').trim();
-        }
-
-        var atb = '';
-        if (iAtb !== -1 && cols[iAtb]) {
-          atb = cols[iAtb].replace(/^[-\s]+/, '').trim();
-        }
+        var proc = iProc >= 0 ? fmtVal(cols[iProc]).replace(/^[,\s\-]+/, '').replace(/\n/g, ' / ') : '';
+        var atb  = iAtb  >= 0 ? fmtVal(cols[iAtb]) : '';
         atb = normalizarAtb(atb);
 
         _registrosExtraidos.push({
-          atendimento:  (cols[iAtend]  || '').trim(),
-          paciente:     (iPac    >= 0 && cols[iPac])    ? cols[iPac].trim()    : '',
-          dtNasc:       (iNasc   >= 0 && cols[iNasc])   ? cols[iNasc].trim()   : '',
-          sexo:         (iSexo   >= 0 && cols[iSexo])   ? cols[iSexo].trim()   : '',
-          peso:         (iPeso   >= 0 && cols[iPeso])   ? cols[iPeso].replace(',', '.').trim() : '',
-          cirurgiao:    (iCir    >= 0 && cols[iCir])    ? cols[iCir].trim()    : '',
-          anestesista:  (iAnest  >= 0 && cols[iAnest])  ? cols[iAnest].trim()  : '',
+          atendimento:  fmtVal(cols[iAtend]),
+          paciente:     iPac    >= 0 ? fmtVal(cols[iPac])    : '',
+          dtNasc:       iNasc   >= 0 ? fmtData(cols[iNasc])  : '',
+          sexo:         iSexo   >= 0 ? fmtVal(cols[iSexo])   : '',
+          peso:         iPeso   >= 0 ? fmtVal(cols[iPeso]).replace(',', '.') : '',
+          cirurgiao:    iCir    >= 0 ? fmtVal(cols[iCir])    : '',
+          anestesista:  iAnest  >= 0 ? fmtVal(cols[iAnest])  : '',
           procedimento: proc,
-          dtCirurgia:   (iDtCir  >= 0 && cols[iDtCir]) ? cols[iDtCir].trim()  : '',
-          horaInfusao:  (iHInf   >= 0 && cols[iHInf])  ? cols[iHInf].trim()   : '',
-          horaInicio:   (iInicio >= 0 && cols[iInicio]) ? cols[iInicio].trim() : '',
-          horaFim:      (iFim    >= 0 && cols[iFim])    ? cols[iFim].trim()    : '',
+          dtCirurgia:   iDtCir  >= 0 ? fmtData(cols[iDtCir]) : '',
+          horaInfusao:  iHInf   >= 0 ? fmtHora(cols[iHInf])  : '',
+          horaInicio:   iInicio >= 0 ? fmtHora(cols[iInicio]) : '',
+          horaFim:      iFim    >= 0 ? fmtHora(cols[iFim])    : '',
           antibiotico:  atb
         });
       }
 
-      nomeEl.textContent = '+ ' + file.name + ' - ' + _registrosExtraidos.length + ' registro(s)';
+      nomeEl.textContent = '+ ' + file.name + ' — ' + _registrosExtraidos.length + ' registro(s)';
       nomeEl.style.color = 'var(--green)';
       if (label) { label.style.borderColor = 'var(--green)'; label.style.background = 'var(--green-bg)'; }
       renderPreviewPDF();
@@ -2240,7 +2252,6 @@ function normalizarAtb(raw) {
   if (s.length > 0) s = s.charAt(0).toUpperCase() + s.slice(1);
   return s;
 }
-
 
 /* =========================================================
    DESFAZER IMPORTAÇÃO DE PDFs
