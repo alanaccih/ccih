@@ -2141,8 +2141,7 @@ function onXlsChange(input) {
       // Tenta decodificar como ISO-8859-1 (padrão do ACCG)
       var bytes = new Uint8Array(e.target.result);
       for (var i = 0; i < bytes.length; i++) texto += String.fromCharCode(bytes[i]);
-      var linhas = texto.split(/?
-/).filter(function(l){ return l.trim(); });
+      var linhas = texto.split('\n').map(function(l){return l.replace(/\r$/,'');}).filter(function(l){ return l.trim(); });
       if (!linhas.length) throw new Error('Arquivo vazio');
 
       // Detecta separador (tab ou ;)
