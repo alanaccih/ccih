@@ -160,7 +160,7 @@ textarea{resize:vertical;min-height:72px;}
 .eq-chk-label{font-family:var(--font-d);font-size:12px;font-weight:500;color:var(--text);}
 /* MULTI-ANTIBIÓTICO */
 .ab-wrap{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:4px;}
-.ab-linha{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 28px;gap:8px;align-items:end;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface);}
+.ab-linha{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 28px;gap:8px;align-items:end;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface);}
 .ab-linha:last-child{border-bottom:none;}
 .ab-linha .fglbl{font-size:10px;font-family:var(--font-d);letter-spacing:.05em;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:4px;}
 .ab-linha input,.ab-linha select{font-size:12px;padding:6px 9px;width:100%;}
@@ -626,7 +626,7 @@ textarea{resize:vertical;min-height:72px;}
         <div class="ctitle" style="margin-bottom:1.25rem;" id="ab-ftitle">Novo antibiótico</div>
         <div class="fgrid">
           <div class="fg full"><label>Nome / apresentação</label><input type="text" id="abn" placeholder="Ex: Cefazolina"></div>
-          <div class="fg"><label>Gramatura (g)</label><input type="number" id="abg" step="0.01" min="0" placeholder="Ex: 2"></div>
+          <div class="fg"><label>Gramatura (und)</label><input type="number" id="abg" step="0.01" min="0" placeholder="Ex: 2"></div>
           <div class="fg"><label>Valor por grama (R$/g)</label><input type="number" id="abv" step="0.01" min="0" placeholder="Ex: 6.25"></div>
           <div class="fg"><label>Código (opcional)</label><input type="text" id="abc" placeholder="Ex: 6.02.01.001-7"></div>
           <div class="fg full"><label>Observações</label><textarea id="abo" style="min-height:56px;" placeholder="Indicações, posologia, observações..."></textarea></div>
@@ -648,8 +648,8 @@ textarea{resize:vertical;min-height:72px;}
             <button class="btn del" style="padding:6px 12px;font-size:12px;" onclick="excluirAb()">Excluir</button>
           </div>
         </div>
-        <div class="mdf"><div class="mdfk">Gramatura</div><div class="mdfv" id="abd-gram">—</div></div>
-        <div class="mdf"><div class="mdfk">Valor por grama</div><div class="mdfv" id="abd-val">—</div></div>
+        <div class="mdf"><div class="mdfk">Gramatura (und)</div><div class="mdfv" id="abd-gram">—</div></div>
+        <div class="mdf"><div class="mdfk">Valor por unidade</div><div class="mdfv" id="abd-val">—</div></div>
         <div id="abd-obs-wrap" style="display:none;" class="mdf" style="border-bottom:none;">
           <div class="mdfk">Observações</div><div class="mdfv" id="abd-obs"></div>
         </div>
@@ -1761,10 +1761,104 @@ function onAuditSelChange() {
   if (!s) return;
   _auditSelId = id;
   fi.style.display = 'block';
-  fi.innerHTML = '<strong>' + (s.iniciais ? s.iniciais + ' · ' : '') + (s.atendimento||s.prontuario||'') + '</strong>' +
-    (s.procedimento ? ' · ' + s.procedimento : '') +
-    (s.antibiotico==='__nao_utilizado__' ? ' · Não utilizado' : s.antibiotico ? ' · ' + s.antibiotico : ' · Sem antibiótico') +
-    ' · ' + fmtDate(s.dataCirurgia||s.data);
+
+  // Monta painel de informações para a auditoria
+  var naoUtil = s.antibiotico === '__nao_utilizado__' || s.antibiotico === 'Nao utilizado' || s.antibiotico === 'Não utilizado';
+
+  // Calcula timing da infusão vs início da cirurgia
+  var timingHtml = '';
+  if (!naoUtil && s.horaInfusao && s.horaCirurgia) {
+    try {
+      var pInf = s.horaInfusao.split(':'), pCir = s.horaCirurgia.split(':');
+      var mInf = parseInt(pInf[0])*60 + parseInt(pInf[1]);
+      var mCir = parseInt(pCir[0])*60 + parseInt(pCir[1]);
+      // diffMin = minutos de antecedência da infusão em relação à incisão
+      // Positivo = infusão ANTES da cirurgia (correto)
+      // Negativo = infusão DEPOIS da cirurgia (erro)
+      var diffMin = mCir - mInf;
+      // Corrige virada de meia-noite: se diff > 12h provavelmente cruzou meia-noite
+      if (diffMin > 720)  diffMin -= 24*60; // infusão era no dia seguinte
+      if (diffMin < -720) diffMin += 24*60; // cirurgia era no dia seguinte
+      var timingLabel = '', timingCor = '', timingBg = '';
+      if (diffMin < 0) {
+        // Infusão DEPOIS do início — erro clínico
+        timingLabel = '✗ Após incisão — infusão ' + Math.abs(diffMin) + ' min depois do início';
+        timingCor = 'var(--red)'; timingBg = 'var(--red-bg)';
+      } else if (diffMin >= 0 && diffMin <= 60) {
+        // Janela ideal: 0 a 60 min antes
+        timingLabel = '✓ Ideal — ' + diffMin + ' min antes da incisão (0–60 min)';
+        timingCor = 'var(--green)'; timingBg = 'var(--green-bg)';
+      } else if (diffMin > 60 && diffMin <= 120) {
+        // Precoce mas aceitável
+        timingLabel = '⚠ Precoce — ' + diffMin + ' min antes da incisão (ideal: 0–60 min)';
+        timingCor = 'var(--amber)'; timingBg = 'var(--amber-bg)';
+      } else {
+        // Muito precoce
+        timingLabel = '⚠ Muito precoce — ' + diffMin + ' min antes da incisão (ideal: 0–60 min)';
+        timingCor = 'var(--red)'; timingBg = 'var(--red-bg)';
+      }
+      timingHtml = '<div style="margin-top:6px;padding:5px 10px;border-radius:4px;font-size:11px;font-weight:500;background:' + timingBg + ';color:' + timingCor + ';display:inline-block;">' + timingLabel + '</div>';
+    } catch(e) {}
+  } else if (!naoUtil && (!s.horaInfusao || !s.horaCirurgia)) {
+    timingHtml = '<div style="margin-top:6px;font-size:11px;color:var(--text3);font-style:italic;">Horário de infusão ou início não informado — timing não calculável</div>';
+  }
+
+  // Monta doses e total de gramas
+  var abDetalhe = '';
+  if (naoUtil) {
+    abDetalhe = '<span style="color:var(--text3);font-style:italic;">Não utilizado</span>';
+  } else if (s.antibioticos && s.antibioticos.length) {
+    var partes = [];
+    for (var ai = 0; ai < s.antibioticos.length; ai++) {
+      var la = s.antibioticos[ai];
+      if (la.antibioticoId === '__nao_utilizado__') continue;
+      var abStr = '<strong>' + (la.antibiotico||'—') + '</strong>';
+      if (la.dose) abStr += ' · ' + la.dose + ' und';
+      // Calcula total em gramas
+      if (la.dose) {
+        for (var ai2 = 0; ai2 < abs.length; ai2++) {
+          if (abs[ai2].id === la.antibioticoId && abs[ai2].gramatura) {
+            var tg2 = parseFloat(String(abs[ai2].gramatura).replace(',','.')) * parseFloat(String(la.dose).replace(',','.'));
+            if (!isNaN(tg2)) abStr += ' = <strong>' + (tg2 % 1 === 0 ? tg2 : tg2.toFixed(2).replace('.',',')) + 'g</strong>';
+            break;
+          }
+        }
+      }
+      partes.push(abStr);
+    }
+    abDetalhe = partes.length ? partes.join(' + ') : (s.antibiotico || '—');
+  } else {
+    abDetalhe = '<strong>' + (s.antibiotico || '—') + '</strong>';
+  }
+
+  fi.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">' +
+
+    // Procedimento
+    '<div style="padding:8px 12px;background:var(--surface2);border-radius:var(--r);border-left:3px solid var(--text3);">' +
+      '<div style="font-size:9px;font-family:var(--font-d);text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px;">Procedimento</div>' +
+      '<div style="font-size:12px;font-weight:500;color:var(--text);">' + (s.procedimento||'—') + '</div>' +
+      '<div style="font-size:11px;color:var(--text3);margin-top:2px;">' + (s.solicitante||'') + (s.equipeNome ? ' · ' + s.equipeNome : '') + '</div>' +
+    '</div>' +
+
+    // Antibiótico e dose
+    '<div style="padding:8px 12px;background:var(--surface2);border-radius:var(--r);border-left:3px solid ' + (naoUtil?'var(--text3)':'var(--text)') + ';">' +
+      '<div style="font-size:9px;font-family:var(--font-d);text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px;">Antibiótico utilizado</div>' +
+      '<div style="font-size:12px;color:var(--text);">' + abDetalhe + '</div>' +
+    '</div>' +
+
+    // Timing
+    '<div style="padding:8px 12px;background:var(--surface2);border-radius:var(--r);border-left:3px solid var(--text3);">' +
+      '<div style="font-size:9px;font-family:var(--font-d);text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px;">Timing da infusão</div>' +
+      '<div style="font-size:11px;color:var(--text3);">' +
+        (s.horaInfusao ? 'Infusão: <strong style="color:var(--text);">' + s.horaInfusao + '</strong>' : 'Infusão: —') +
+        ' &nbsp;|&nbsp; ' +
+        (s.horaCirurgia ? 'Início cirurgia: <strong style="color:var(--text);">' + s.horaCirurgia + '</strong>' : 'Início: —') +
+      '</div>' +
+      timingHtml +
+    '</div>' +
+
+    '</div>';
   fr.style.display = 'none';
   fc.style.display = 'block';
   renderAuditOpcoes(s.auditoria ? s.auditoria.classificacao : '');
@@ -2141,7 +2235,7 @@ function onXlsChange(input) {
       var data = new Uint8Array(e.target.result);
       var wb   = XLSX.read(data, { type: 'array', cellDates: true });
       var ws   = wb.Sheets[wb.SheetNames[0]];
-      var rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, dateNF: 'dd/mm/yyyy' });
+      var rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, dateNF: 'dd/mm/yyyy' });
 
       if (!rows || rows.length < 2) throw new Error('Arquivo vazio ou sem dados.');
 
@@ -2182,24 +2276,59 @@ function onXlsChange(input) {
 
       function fmtData(v) {
         if (!v) return '';
+        // Se for objeto Date (cellDates:true)
+        if (v instanceof Date) {
+          var d = v.getUTCDate ? v : new Date(v);
+          var dd = String(d.getUTCDate()).padStart(2,'0');
+          var mo = String(d.getUTCMonth()+1).padStart(2,'0');
+          var yy = d.getUTCFullYear();
+          // Corrige anos futuros erroneos (ex: 2050 quando deveria ser 1950)
+          if (yy > new Date().getFullYear() + 1) yy -= 100;
+          return dd + '/' + mo + '/' + yy;
+        }
         var s = String(v).trim();
-        // Se ja esta no formato dd/mm/yyyy retorna direto
+        // dd/mm/yyyy — ja correto
         if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
-        // Se esta no formato yyyy-mm-dd converte
+        // yyyy-mm-dd
         if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
           var p = s.slice(0,10).split('-');
           return p[2] + '/' + p[1] + '/' + p[0];
+        }
+        // M/D/YY formato americano SheetJS
+        var mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+        if (mdy) {
+          var mm2 = mdy[1].padStart(2,'0');
+          var dd2 = mdy[2].padStart(2,'0');
+          var yy2 = mdy[3].length === 2 ? (parseInt(mdy[3]) > 30 ? '19'+mdy[3] : '20'+mdy[3]) : mdy[3];
+          return dd2 + '/' + mm2 + '/' + yy2;
         }
         return s;
       }
 
       function fmtHora(v) {
         if (!v) return '';
-        var s = String(v).trim();
-        // HH:MM:SS -> HH:MM
-        var m = s.match(/^(\d{1,2}):(\d{2})/);
-        if (m) return m[1].padStart(2,'0') + ':' + m[2];
-        return s;
+        // String direta HH:MM ou HH:MM:SS (SheetJS com raw:true retorna string para horas)
+        if (typeof v === 'string') {
+          var s2 = v.trim();
+          var m2 = s2.match(/^(\d{1,2}):(\d{2})/);
+          if (m2) return m2[1].padStart(2,'0') + ':' + m2[2];
+          return s2;
+        }
+        // Objeto Date — usa hora LOCAL (não UTC) pois SheetJS não converte fuso
+        if (v instanceof Date) {
+          var hh = String(v.getHours()).padStart(2,'0');
+          var mi = String(v.getMinutes()).padStart(2,'0');
+          return hh + ':' + mi;
+        }
+        // Numero decimal Excel (fração de dia): ex 0.917 = 22:00
+        if (typeof v === 'number') {
+          var frac = v < 1 ? v : v - Math.floor(v);
+          var totalMin = Math.round(frac * 24 * 60);
+          var hh2 = Math.floor(totalMin / 60) % 24;
+          var mi2 = totalMin % 60;
+          return String(hh2).padStart(2,'0') + ':' + String(mi2).padStart(2,'0');
+        }
+        return String(v).trim();
       }
 
       _registrosExtraidos = [];
@@ -2208,8 +2337,17 @@ function onXlsChange(input) {
         if (!cols || !cols[iAtend] || !String(cols[iAtend]).trim()) continue;
 
         var proc = iProc >= 0 ? fmtVal(cols[iProc]).replace(/^[,\s\-]+/, '').replace(/\n/g, ' / ') : '';
-        var atb  = iAtb  >= 0 ? fmtVal(cols[iAtb]) : '';
-        atb = normalizarAtb(atb);
+        var atbRaw = iAtb >= 0 ? fmtVal(cols[iAtb]) : '';
+        // Múltiplos ATBs separados por \n — processa cada um
+        var atbLinhas = atbRaw.split('\n').map(function(x){ return x.trim(); }).filter(function(x){ return x.length > 0; });
+        var atbNomes = [], atbDoses = [];
+        for (var abi = 0; abi < atbLinhas.length; abi++) {
+          var atbObj = normalizarAtb(atbLinhas[abi]);
+          if (atbObj.nome) { atbNomes.push(atbObj.nome); atbDoses.push(atbObj.dose); }
+        }
+        if (!atbLinhas.length) { var atbObj0 = normalizarAtb(''); atbNomes.push(atbObj0.nome); atbDoses.push(atbObj0.dose); }
+        var atbNome = atbNomes.join(' + ');
+        var atbDose = atbDoses[0] || '';
 
         _registrosExtraidos.push({
           atendimento:  fmtVal(cols[iAtend]),
@@ -2224,7 +2362,9 @@ function onXlsChange(input) {
           horaInfusao:  iHInf   >= 0 ? fmtHora(cols[iHInf])  : '',
           horaInicio:   iInicio >= 0 ? fmtHora(cols[iInicio]) : '',
           horaFim:      iFim    >= 0 ? fmtHora(cols[iFim])    : '',
-          antibiotico:  atb
+          antibiotico:  atbNome,
+          dose:         atbDoses[0] || '',
+          doses:        atbDoses
         });
       }
 
@@ -2243,14 +2383,32 @@ function onXlsChange(input) {
 }
 
 function normalizarAtb(raw) {
-  if (!raw || !raw.trim()) return '';
+  if (!raw || !raw.trim()) return { nome: '', dose: '' };
   var s = raw.trim();
+  // Extrai dose do parenteses: "(dose = 2)" ou "(dose = 2000)"
+  var dose = '';
+  var doseMatch = s.match(/\(dose\s*=\s*([\d.]+)\s*\)/i);
+  if (doseMatch) {
+    var doseVal = parseFloat(doseMatch[1]);
+    // Se dose vier em mg (ex: 2000 mg = 2g), converte
+    // Heuristica: se valor > 100 provavelmente é mg
+    if (doseVal >= 100) doseVal = doseVal / 1000;
+    dose = String(doseVal);
+  }
+  // Remove dose do nome
+  s = s.replace(/\s*\(dose\s*=\s*[\d.]+\s*\)/gi, '').trim();
+  // Remove prefixo "- "
   s = s.replace(/^-\s*/, '');
+  // Normaliza gramatura: 1gr -> 1g, 750 Mg -> 0,75g
   s = s.replace(/(\d+)\s*gr\b/gi, '$1g');
-  s = s.replace(/\s*\(dose\s*=\s*[\d\s]+\)/gi, '').trim();
+  s = s.replace(/(\d+)\s*[Mm][Gg]\s*[Ii]nj\.?/g, function(m, n) {
+    return (parseFloat(n)/1000) + 'g Inj.';
+  });
+  // Remove sufixos como "Inj." se ficar sozinho
+  s = s.replace(/\s+Inj\.?\s*$/i, '').trim();
   s = s.replace(/\s+/g, ' ').trim();
   if (s.length > 0) s = s.charAt(0).toUpperCase() + s.slice(1);
-  return s;
+  return { nome: s, dose: dose };
 }
 
 /* =========================================================
@@ -2314,7 +2472,9 @@ function renderPreviewPDF() {
 
     var rowBg = st.tipo==='erro' ? 'background:#fffafa;' : '';
     var rowOp = jaExiste ? 'opacity:.5;' : '';
-    var abExib = st.tipo==='nao_utilizado' ? '<span style="color:var(--text3);font-style:italic;">Nao utilizado</span>' : (r.antibiotico||'—');
+    var abExib = st.tipo==='nao_utilizado'
+      ? '<span style="color:var(--text3);font-style:italic;">Nao utilizado</span>'
+      : (r.antibiotico||'—') + (r.dose ? '<span style="font-size:10px;color:var(--text3);margin-left:4px;">' + r.dose + 'g</span>' : '');
     var horaExib = st.tipo==='nao_utilizado' ? '—' : (r.horaInfusao||'—');
     var chkDis = (jaExiste || st.tipo==='erro') ? 'disabled' : 'checked';
 
@@ -2387,8 +2547,13 @@ function importarSelecionados() {
     // Converte data dd/mm/yyyy -> yyyy-mm-dd
     function convData(s) {
       if (!s) return '';
-      var p = s.split('/');
-      return p.length === 3 ? p[2]+'-'+p[1]+'-'+p[0] : s;
+      s = String(s).trim();
+      // dd/mm/yyyy
+      var dmy = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (dmy) return dmy[3] + '-' + dmy[2] + '-' + dmy[1];
+      // yyyy-mm-dd ja correto
+      if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+      return s;
     }
 
     // Idade
@@ -2412,20 +2577,52 @@ function importarSelecionados() {
       for (var p2 = 0; p2 < Math.min(pts.length, 3); p2++) if (pts[p2]) iniciais += pts[p2][0] + '.';
     }
 
-    var dtCir = convData(r.dtCirurgia);
+    var dtCir    = convData(r.dtCirurgia);
+    var horaIni  = r.horaInicio || '';
+    var horaFimV = r.horaFim    || '';
 
-    // Antibiotico
-    var abId = '__nao_utilizado__', abNome2 = 'Nao utilizado', abValorG = '';
-    if (!naoUtil && r.antibiotico) {
-      abId = ''; abNome2 = r.antibiotico;
-      for (var a = 0; a < abs.length; a++) {
-        var abCad = (abs[a].nome||'').toLowerCase().split('(')[0].trim();
-        if (abCad.length > 3 && r.antibiotico.toLowerCase().indexOf(abCad) !== -1) {
-          abId = abs[a].id; abValorG = abs[a].valor||'';
-          abNome2 = abs[a].nome + (abs[a].gramatura ? ' ' + abs[a].gramatura + 'g' : '');
-          break;
+    // Calcula duração automaticamente
+    var duracaoStr = '';
+    if (horaIni && horaFimV) {
+      try {
+        var p1 = horaIni.split(':'),  p2 = horaFimV.split(':');
+        var m1 = parseInt(p1[0])*60 + parseInt(p1[1]);
+        var m2 = parseInt(p2[0])*60 + parseInt(p2[1]);
+        var diff = m2 - m1;
+        if (diff < 0) diff += 24*60; // virada de meia-noite
+        var dh = Math.floor(diff/60), dm = diff%60;
+        duracaoStr = dh + 'h ' + String(dm).padStart(2,'0') + 'min';
+      } catch(e3) {}
+    }
+
+    // Antibiotico — suporta múltiplos (nome1 + nome2)
+    var linhasAbImport = [];
+    var abNome2 = 'Não utilizado';
+    var abTotalGeral = 0;
+
+    if (naoUtil) {
+      linhasAbImport.push({ antibioticoId:'__nao_utilizado__', antibiotico:'Não utilizado', valorG:'', dose:'', total:0 });
+    } else {
+      // Separa múltiplos ATBs pelo separador " + "
+      var nomesSplit = (r.antibiotico||'').split(' + ');
+      var dosesSplit = r.doses || [r.dose || ''];
+      for (var ab2i = 0; ab2i < nomesSplit.length; ab2i++) {
+        var abNomeI = nomesSplit[ab2i].trim();
+        var abDoseI = dosesSplit[ab2i] || dosesSplit[0] || '';
+        var abIdI = '', abValorGI = '', abNomeFinal = abNomeI, abTotalI = 0;
+        for (var a = 0; a < abs.length; a++) {
+          var abCad = (abs[a].nome||'').toLowerCase().split('(')[0].trim();
+          if (abCad.length > 3 && abNomeI.toLowerCase().indexOf(abCad) !== -1) {
+            abIdI = abs[a].id; abValorGI = abs[a].valor||'';
+            abNomeFinal = abs[a].nome + (abs[a].gramatura ? ' ' + abs[a].gramatura + 'g' : '');
+            if (abDoseI && abValorGI) abTotalI = parseFloat(abDoseI) * parseFloat(abValorGI) || 0;
+            break;
+          }
         }
+        linhasAbImport.push({ antibioticoId: abIdI, antibiotico: abNomeFinal, valorG: abValorGI, dose: abDoseI, total: abTotalI });
+        abTotalGeral += abTotalI;
       }
+      abNome2 = nomesSplit.join(' + ');
     }
 
     sols.push({
@@ -2445,13 +2642,14 @@ function importarSelecionados() {
       solicitante:  medNome,
       anestesista:  r.anestesista || '',
       dataCirurgia: dtCir,
-      horaCirurgia: r.horaInicio || '',
-      horaFim:      r.horaFim || '',
+      horaCirurgia: horaIni,
+      horaFim:      horaFimV,
+      duracaoCirurgia: duracaoStr,
       data:         dtCir,
       horaInfusao:  naoUtil ? '' : (r.horaInfusao || ''),
       antibiotico:  abNome2,
-      antibioticos: [{ antibioticoId: abId, antibiotico: abNome2, valorG: abValorG, dose: '', total: 0 }],
-      antibioticoValor: 0,
+      antibioticos: linhasAbImport,
+      antibioticoValor: abTotalGeral,
       obs: ''
     });
     importados++;
@@ -3131,7 +3329,7 @@ function renderAbs() {
     html += '<div class="mcard' + (a.id===selAb?' sel':'') + '" onclick="selantibiotico(\'' + a.id + '\')">' +
       '<div class="mav" style="border-radius:6px;font-size:9px;background:var(--blue-bg);color:var(--blue);border-color:var(--blue-bg);">AB</div>' +
       '<div class="mnfo"><div class="mnome">' + a.nome + (a.gramatura?' '+a.gramatura+'g':'') + '</div>' +
-      '<div class="msub">' + (a.valor ? fmtBRL(a.valor)+'/g' : 'Sem valor') + (a.cod?' · '+a.cod:'') + '</div></div></div>';
+      '<div class="msub">' + (a.valor ? fmtBRL(a.valor)+'/und' : 'Sem valor') + (a.cod?' · '+a.cod:'') + '</div></div></div>';
   }
   el.innerHTML = html;
 }
@@ -3149,7 +3347,7 @@ function renderDetAb() {
   document.getElementById('abd-nome').textContent = (a.nome||'—') + (a.gramatura?' '+a.gramatura+'g':'');
   document.getElementById('abd-cod').textContent  = a.cod || '';
   document.getElementById('abd-gram').textContent = a.gramatura ? a.gramatura+'g' : 'Não informada';
-  document.getElementById('abd-val').textContent  = a.valor ? fmtBRL(a.valor)+'/g' : 'Não informado';
+  document.getElementById('abd-val').textContent  = a.valor ? fmtBRL(a.valor)+'/und' : 'Não informado';
   var ow = document.getElementById('abd-obs-wrap');
   if (a.obs) { ow.style.display='flex'; document.getElementById('abd-obs').textContent = a.obs; }
   else ow.style.display = 'none';
@@ -3336,15 +3534,31 @@ function renderLinhasAb() {
   for (i = 0; i < abLinhas.length; i++) {
     l = abLinhas[i];
     var naoUtil = l.abId === '__nao_utilizado__';
+
+    // Calcula total em gramas: dose (und) × gramatura (g)
+    var gramatura = '';
+    var totalGramas = '';
+    if (!naoUtil && l.abId) {
+      for (var gi = 0; gi < abs.length; gi++) {
+        if (abs[gi].id === l.abId) { gramatura = abs[gi].gramatura || ''; break; }
+      }
+      if (gramatura && l.dose) {
+        var tg = parseFloat(String(gramatura).replace(',','.')) * parseFloat(String(l.dose).replace(',','.'));
+        if (!isNaN(tg)) totalGramas = tg % 1 === 0 ? tg + 'g' : tg.toFixed(2).replace('.',',') + 'g';
+      }
+    }
+
     html += '<div class="ab-linha">' +
       '<div><span class="fglbl">Antibiótico</span>' +
       '<select onchange="onAbLinha(\'' + l.id + '\',this.value)">' +
       '<option value="">Selecione...</option>' + opts.replace('value="'+l.abId+'"','value="'+l.abId+'" selected') +
       '</select></div>' +
-      '<div><span class="fglbl">Valor/g (R$)</span>' +
-      '<input type="text" readonly value="' + (naoUtil ? '—' : (l.valorG ? fmtBRL(l.valorG)+'/g' : '')) + '" style="background:var(--surface2);cursor:default;color:var(--text2);"></div>' +
-      '<div><span class="fglbl">Dose (g)</span>' +
+      '<div><span class="fglbl">Valor/und (R$)</span>' +
+      '<input type="text" readonly value="' + (naoUtil ? '—' : (l.valorG ? fmtBRL(l.valorG)+'/und' : '')) + '" style="background:var(--surface2);cursor:default;color:var(--text2);"></div>' +
+      '<div><span class="fglbl">Dose (und)</span>' +
       '<input type="number" step="0.1" min="0" placeholder="Ex: 2" value="' + (naoUtil ? '' : (l.dose||'')) + '" ' + (naoUtil?'disabled style="background:var(--surface2);cursor:default;"':'') + ' oninput="onDoseLinha(\'' + l.id + '\',this.value)"></div>' +
+      '<div><span class="fglbl">Total (g)</span>' +
+      '<input type="text" readonly value="' + (naoUtil ? '—' : totalGramas) + '" style="background:var(--surface2);cursor:default;color:var(--text2);font-weight:500;" title="' + (totalGramas ? 'Dose × gramatura = ' + totalGramas : '') + '"></div>' +
       '<div><span class="fglbl">Total (R$)</span>' +
       '<input type="text" readonly value="' + (naoUtil ? '—' : (l.total ? fmtBRL(l.total) : '')) + '" style="background:var(--surface2);cursor:default;color:var(--text2);font-weight:500;"></div>' +
       '<button class="ab-del-btn" onclick="removerLinhaAb(\'' + l.id + '\')" title="Remover">\xD7</button>' +
@@ -3368,8 +3582,8 @@ function onAbLinha(id, abId) {
     var nome = prompt('Nome do antibiótico:\n(Ex: Ampicilina 1g)');
     if (!nome || !nome.trim()) { renderLinhasAb(); return; }
     nome = nome.trim();
-    var gram  = prompt('Gramatura (g):\n(Ex: 1 — deixe em branco se não souber)') || '';
-    var valor = prompt('Valor por grama (R$):\n(Ex: 1.50 — deixe em branco se não souber)') || '';
+    var gram  = prompt('Gramatura (und):\n(Ex: 1 — deixe em branco se não souber)') || '';
+    var valor = prompt('Valor por unidade (R$):\n(Ex: 1.50 — deixe em branco se não souber)') || '';
     var novoId = 'ab_' + Date.now();
     abs.push({ id: novoId, nome: nome, gramatura: gram.trim(), valor: valor.trim() });
     save();
